@@ -1,0 +1,1 @@
+CREATE TABLE projects(id INT(11) AUTO_INCREMENT PRIMARY KEY, username VARCHAR(100), customer_name VARCHAR(100), components TEXT, business_requirements TEXT, technical_requirements TEXT, governance_requirements TEXT,  creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, is_active BOOL, editor VARCHAR(100), vn TEXT);

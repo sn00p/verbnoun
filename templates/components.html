@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+  function deleteComponent(id, name) {
+    if (confirm("Do you really want to delete component \"" + name + "\"?")) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_component/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/components";
+        },
+          error: function(response, error) {
+            console.log(response);
+              alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }
+
+  window.onload = function() {
+    var table = document.getElementById("componentsTable");
+    for (i = 1; i < table.rows.length; i++) {
+      if (table.rows[i].cells[2].childNodes[0].getAttribute("href").indexOf("http") < 0) {
+        table.rows[i].cells[2].childNodes[0].setAttribute("href", "http://" + table.rows[i].cells[2].childNodes[0].getAttribute("href"))
+      }
+    }
+  }
+  
+</script>
+    <h1>Components</h1>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <a class="btn btn-violet" href="/add_component">Add component</a>
+    <hr>
+    <table class="table table-striped" id="componentsTable">
+      <tr>
+        <th>Category</th>
+        <th>Name</th>
+        <th>Link</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for component in components %}
+      <tr>
+        <td>{{ component.category }}</td>
+        <td>{{ component.name }}</td>
+        <td><a target="_blank" href="{{ component.link }}">{{ component.link }}</a></td>
+        <td><a href="edit_component/{{ component.id }}" class="btn btn-violet ">Edit</a></td>
+        <td><button class="btn btn-danger" onclick="deleteComponent({{ component.id }}, '{{ component.name }}')">Delete</button></td>
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

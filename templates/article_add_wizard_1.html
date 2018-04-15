@@ -1,0 +1,56 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+	window.onload = function() {
+		var customer_name ="{{project_customername}}";
+		if (customer_name !== "") {
+			document.getElementById("nameSel").value = customer_name;
+		}
+	}
+	function addCustomer() {
+		var name = document.getElementById("nameSel").value;
+		if (document.getElementById("nameField").value.trim() != "") {
+			name = document.getElementById("nameField").value;
+		}
+		submitObj = {
+			"name": name
+		}
+		console.log(submitObj);
+		var body = JSON.stringify(submitObj);
+	    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+	    $.ajax({
+	      type: "POST",
+	        headers: {"Content-Type": "application/json"},
+	          url: $SCRIPT_ROOT + "/article_add_wizard_1",
+	          data: body,
+	          success: function(response) {
+	              window.location = "article_add_wizard_2";
+	            },
+	            error: function(response, error) {
+	                console.log(response);
+	                console.log(error);
+	              }
+	          });
+	    return false;
+	}
+</script>
+    <p><font size="5">Step 1. Select customer</font></p>
+      <div class="input-group" style="margin-top: 20px;">
+	      <span class="input-group-addon" style="width: 150px">Customer</span>
+	      <select id="nameSel" class="form-control" id="sel" style="width: 300px">
+	        {% for customer in customers: %}
+	        <option value="{{customer.name}}">{{customer.name}}</option>>
+	        {% endfor %}
+	      </select>
+	    </div>
+	    <h4>Or add new one:</h4>
+	    <div class="input-group" style="margin-top: 20px;">
+	      <span class="input-group-addon" style="width: 150px">New Customer</span>
+	      <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+	    </div>
+	    <hr>
+      <div style="float: right;">
+      	<button class="btn btn-violet btn-right" style="width: 200px" type="button" onclick="addCustomer();false;" value="Next &gt">Next &gt</button>
+      </div>
+{% endblock %}

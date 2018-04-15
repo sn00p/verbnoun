@@ -1,0 +1,10 @@
+flask
+flask-mysqldb
+Flask-WTF
+passlib
+flask_jsglue
+Flask-Mail
+cairocffi
+weasyprint
+redis
+uwsgi

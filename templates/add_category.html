@@ -1,0 +1,44 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+  function save() {
+    var obj = {
+      "name": document.getElementById("nameField").value,
+      "group": document.getElementById("groupField").value
+    }
+    var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/add_category",
+            data: body,
+            success: function(response) {
+                window.location.href = "/categories";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  }
+</script>
+    <h1>Add category</h1>
+    <hr>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Name</span>
+      <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Group</span>
+      <select id="groupField" class="form-control" id="sel" style="width: 300px">
+        {% for group in groups: %}
+        <option value="{{group.name}}">{{group.name}}</option>>
+        {% endfor %}
+      </select>
+    </div>
+    <hr>
+    <button id="saveButton" class="btn btn-violet" style="width: 75px; margin-top: 30px; margin-bottom: 50px" onclick="save()">Save</button>
+{% endblock %}

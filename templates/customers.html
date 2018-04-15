@@ -1,0 +1,50 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+  function deleteCustomer(id, name) {
+    if (confirm("Do you really want to delete customer " + name + "? All VerbNouns for " + name + " and all clients of " + name + " will be deleted.")) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_customer/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/customers";
+        },
+          error: function(response, error) {
+            console.log(response);
+          }
+      });
+    }
+  }
+</script>
+    <h1>Customers</h1>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <a class="btn btn-violet" href="/add_customer">Add customer</a>
+    <hr>
+    <table class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <th>Comments</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for customer in customers %}
+      <tr>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.comments }}</td>
+        <td><a href="edit_customer/{{ customer.id }}" class="btn btn-violet">Edit</a></td>
+        <td>
+          <!--<form action="{{url_for('delete_customer', id=customer.id)}}" method="post" >
+            <input type="hidden" name="_method" value="DELETE">
+            <input type="submit" value="Delete" class="btn btn-danger">
+          </form>-->
+          <button class="btn btn-danger" onclick="deleteCustomer({{ customer.id }}, '{{customer.name}}')">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

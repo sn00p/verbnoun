@@ -1,0 +1,575 @@
+<script>
+  function recalculate() {
+    var table = document.getElementById("verbnoun-table");
+
+    var priorities = [];
+    var weights = [];
+    var cells = [];
+    var totalPriority = 0;
+
+    var minRow = 1;
+    var maxRow = table.rows.length - 1;
+    var minCell = 2;
+    var maxCell = table.rows[0].cells.length - 1;
+
+    for (j = 2; j < maxCell; j++) {
+      weights.push([]);
+    }
+
+    for (i = minRow; i < maxRow; i++) {
+      var priority = parseInt(table.rows[i].cells[1].children[0].value);
+      priorities.push(priority);
+      totalPriority += priority;
+      for (j = minCell; j < maxCell; j++) {
+        var weight = parseInt(table.rows[i].cells[j].children[0].value);
+        weights[j - minCell].push(weight);
+      }
+    }
+
+    table.rows[maxRow].cells[1].innerHTML = totalPriority;
+
+    for (j = minCell; j < maxCell; j++) {
+      var totalWeight = 0;
+      for (i = minRow; i < maxRow; i++) {
+        //totalWeight += priorities[i - minRow] * weights[j - minCell][i - minRow] * 0.5;
+        totalWeight += priorities[i - minRow] * getWeight(weights[j - minCell][i - minRow]);
+      }
+      table.rows[maxRow].cells[j].innerHTML = totalWeight;
+    }
+  }
+
+  function getWeight(index) {
+    if (index == 0) {
+      return 0;
+    } else if (index == 1) {
+      return 0;
+    } else if (index == 2) {
+      return 0.5;
+    } else if (index == 3) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  function prepare() {
+    var table = document.getElementById("verbnoun-table");
+
+    var cells = [];
+
+    var minRow = 1;
+    var maxRow = table.rows.length - 1;
+    var minCell = 2;
+    var maxCell = table.rows[0].cells.length - 1;
+
+    for (i = 0; i < table.rows.length; i++) {
+      cells[i] = [];
+      cells[i].push(table.rows[i].cells[0].innerHTML);
+    }
+
+    cells[0].push(table.rows[0].cells[1].innerHTML);
+
+    for (i = minRow; i < maxRow; i++) {
+      cells[i].push(table.rows[i].cells[1].children[0].value);
+    }
+
+    cells[maxRow].push(table.rows[maxRow].cells[1].innerHTML);
+
+    for (j = minCell; j < maxCell; j++) {
+      cells[0].push(table.rows[0].cells[j].innerHTML);
+      for (i = minRow; i < maxRow; i++) {
+        cells[i].push(table.rows[i].cells[j].children[0].value);
+      }
+      cells[maxRow].push(table.rows[maxRow].cells[j].innerHTML);
+    }
+
+    var cellsJSON = JSON.stringify(cells).replace(/'/g, '"');
+    // window.alert(cellsJSON);
+    return cellsJSON;
+  }
+
+  function save_article() {
+    body = prepare();
+    window.location = "save_article/" + body;
+  }
+
+  function update_article() {
+    body = prepare();
+    window.location = "/update_article/" + {{ article.id }} +'/'+ body;
+  }
+
+  function load_article() {
+    document.getElementById("vntitle").innerHTML = "VerbNoun " + '{{ article.create_date }}';
+    var cells = JSON.parse('{{ article.body | safe }}');
+    var table = document.getElementById("verbnoun-table");
+    var minRow = 1;
+    var maxRow = cells.length - 1;
+    var minCell = 2;
+    var maxCell = cells[0].length;
+    var priorities = ['', 'Nice to have', 'Whish list', 'Based on Policy', 'Best Practice', 'Must have'];
+    var weights = ['N/A', 'No', 'Partial', 'Yes'];
+
+    subBpr = 0;
+    subTpr = 0;
+    subGpr = 0;
+    subBW = [];
+    subTW = [];
+    subGW = [];
+
+    var tbody = table.createTBody();
+    var row = tbody.insertRow();
+
+    var emptyheader = document.createElement("TH");
+    for (j = 0; j < 3; j++) {
+      data = cells[0][j];
+      emptyheader.innerHTML = data;
+    }
+    row.appendChild(emptyheader);
+    emptyheader.setAttribute("colspan", 3);
+
+    for (j = 3; j < maxCell; j++) {
+      data = cells[0][j];
+      header = document.createElement("TH");
+      header.innerHTML = data;
+      row.appendChild(header);
+      if (data != "") {
+        header.setAttribute("colspan", cells[0][j+1]);
+        header.setAttribute("class", "text-center");
+        j++;
+      }
+    }
+
+    var h2 = tbody.insertRow();
+    for (j = 0; j < cells[1].length; j++) {
+      data = cells[1][j];
+      header = document.createElement("TH");
+      header.innerHTML = data;
+      h2.appendChild(header);
+      subBW.push(0);
+      subTW.push(0);
+      subGW.push(0);
+    }
+
+    for (i = 2; i < cells.length-1; i++) {
+      rnumber = cells[i][0];
+      row = tbody.insertRow();
+      cell0 = row.insertCell();
+      cell0.innerHTML = '<b>' + rnumber + '</b>';
+
+      rname = cells[i][1];
+      cell1 = row.insertCell();
+      cell1.innerHTML = rname;
+
+      rpriority = priorities[Number.parseInt(cells[i][2])];
+      cell2 = row.insertCell();
+      cell2.innerHTML = '<b>' + rpriority + '</b>';
+
+      if (table.rows[i].cells[0].innerHTML.indexOf("BR") > -1) {
+        subBpr += Number.parseInt(cells[i][2]);
+      }
+      if (table.rows[i].cells[0].innerHTML.indexOf("TR") > -1) {
+        subTpr += Number.parseInt(cells[i][2]);
+      }
+      if (table.rows[i].cells[0].innerHTML.indexOf("GR") > -1) {
+        subGpr += Number.parseInt(cells[i][2]);
+      }
+
+      for (j=3; j < cells[i].length; j++) {
+        data = weights[Number.parseInt(cells[i][j])];
+        console.log()
+        cell = row.insertCell();
+        cell.innerHTML = data;
+
+        if (data == "N/A") {
+          cell.style.backgroundColor = "rgba(100, 100, 100, 0.3)";
+        } else if (data == "No") {
+          cell.style.backgroundColor = "rgba(255, 0, 0, 0.3)";
+        } else if (data == "Yes") {
+          cell.style.backgroundColor = "rgba(0, 255, 0, 0.3)";
+        }
+        else if (data == "Partial") {
+          cell.style.backgroundColor = "rgba(255, 255, 0, 0.3)";
+        }
+
+        if (table.rows[i].cells[0].innerHTML.indexOf("BR") > -1) {
+          subBW[j] += getWeight(Number.parseInt(cells[i][j])) * Number.parseInt(cells[i][2]);
+        }
+        if (table.rows[i].cells[0].innerHTML.indexOf("TR") > -1) {
+          subTW[j] += getWeight(Number.parseInt(cells[i][j])) * Number.parseInt(cells[i][2]);
+        }
+        if (table.rows[i].cells[0].innerHTML.indexOf("GR") > -1) {
+          subGW[j] += getWeight(Number.parseInt(cells[i][j])) * Number.parseInt(cells[i][2]);
+        }
+      }
+    }
+
+
+    totalrow = tbody.insertRow();
+    totalrow.style = "text-align: center";
+    totalcell = totalrow.insertCell();
+    totalrow.setAttribute("id", "totalRow");
+    totalcell.setAttribute("colspan", 2);
+    totalcell.setAttribute("class", "text-center");
+    totalcell.innerHTML = "<b>Total: </b>";
+
+    for (k = 2; k < cells[cells.length-1].length; k++) {
+      cell = totalrow.insertCell();
+      cell.setAttribute("class", "text-center");
+      cell.innerHTML = '<b>' + cells[cells.length-1][k] + '</b>';
+    }
+
+    //Business requirements subtotal
+    for (i = 0; i < table.rows.length-1; i++) {
+      if (table.rows[i].cells[0].innerHTML.indexOf("BR") > -1 && table.rows[i+1].cells[0].innerHTML.indexOf("TR") > -1) {
+        var subRow = tbody.insertRow(i+1);
+        subRow.style = "background-color: #f2f2f2; font-weight: bold; text-align: center";
+        subRow.setAttribute("id", "subTotalBusiness");
+        //var subCell0 = subRow.insertCell();
+        var subCell1 = subRow.insertCell();
+        subCell1.colSpan = 2;
+        var subCellPriority = subRow.insertCell();
+        subCellPriority.innerHTML = subBpr;
+        subCell1.innerHTML = "Subtotal:";
+        for (cl = 3; cl < subBW.length; cl++) {
+          var subCell = subRow.insertCell();
+          subCell.innerHTML = subBW[cl];
+        }
+        break;
+      }
+    }
+
+    //Technical requirements subtotal
+    for (i = 0; i < table.rows.length-1; i++) {
+      if (table.rows[i].cells[0].innerHTML.indexOf("TR") > -1 && table.rows[i+1].cells[0].innerHTML.indexOf("GR") > -1) {
+        var subRow = tbody.insertRow(i+1);
+        subRow.style = "background-color: #f2f2f2; font-weight: bold; text-align: center";
+        subRow.setAttribute("id", "subTotalTechnical");
+        //var subCell0 = subRow.insertCell();
+        var subCell1 = subRow.insertCell();
+        subCell1.colSpan = 2;
+        var subCellPriority = subRow.insertCell();
+        subCellPriority.innerHTML = subTpr;
+        subCell1.innerHTML = "Subtotal:";
+        for (cl = 3; cl < subTW.length; cl++) {
+          var subCell = subRow.insertCell();
+          subCell.innerHTML = subTW[cl];
+        }
+        break;
+      }
+    }
+
+    //Governance subtotal
+    var subRow = tbody.insertRow(table.rows.length-1);
+    subRow.style = "background-color: #f2f2f2; font-weight: bold; text-align: center";
+    subRow.setAttribute("id", "subTotalGovernance");
+    //var subCell0 = subRow.insertCell();
+    var subCell1 = subRow.insertCell();
+    subCell1.colSpan = 2;
+    var subCellPriority = subRow.insertCell();
+    subCellPriority.innerHTML = subGpr;
+    subCell1.innerHTML = "Subtotal:";
+    for (cl = 3; cl < subGW.length; cl++) {
+      var subCell = subRow.insertCell();
+      subCell.innerHTML = subGW[cl];
+    }
+
+    //Product comp
+    var productCompTable = document.getElementById("productCompTable");
+    var productCompData = JSON.parse('{{ article.product_comp | safe }}');
+
+    var headerOne = productCompTable.insertRow(0);
+    headerOne.innerHTML = table.rows[0].innerHTML.replace('<th colspan="3"></th>', '<th rowspan="2"></th>');
+    /*var headerTwo = productCompTable.insertRow();
+    headerTwo = table.rows[1].innerHTML.replace('<th>R#</th><th>Requirement</th><th>Priority</th>', '');
+    console.log(table.rows[0].innerHTML);
+    console.log(table.rows[1].innerHTML);*/
+    var headerTwo = productCompTable.insertRow();
+    headerTwo.style.fontWeight = "bold";
+    for (i = 3; i < table.rows[1].cells.length; i++) {
+      var htCell = headerTwo.insertCell();
+      htCell.innerHTML = table.rows[1].cells[i].innerHTML;
+    }
+
+  }
+
+  function edit_article() {
+    var cells = JSON.parse('{{ article.body | safe }}');
+    var table = document.getElementById("verbnoun-table");
+    var minRow = 1;
+    var maxRow = cells.length - 1;
+    var minCell = 2;
+    var maxCell = cells[0].length;
+    var priorities = ['', 'Nice to have', 'Whish list', 'Based on Policy', 'Best Practice', 'Must have'];
+    var weights = ['N/A', 'No', 'Partial', 'Yes'];
+
+    var tbody = table.createTBody();
+    var row = tbody.insertRow();
+    for (j = 0; j < maxCell; j++) {
+      data = cells[0][j];
+      header = document.createElement("TH");
+      row.appendChild(header)
+      header.innerHTML = data;
+    }
+    row.insertCell();
+
+    for (i = minRow; i < maxRow; i++) {
+      data = cells[i][0];
+      row = tbody.insertRow();
+      cell = row.insertCell();
+      cell.innerHTML = data;
+      data = priorities[cells[i][1]];
+      cell = row.insertCell();
+      select = document.createElement("SELECT");
+      select.className = 'form-control';
+      for (k = 1; k < priorities.length; k++) {
+        var option = document.createElement("OPTION");
+        option.value = k;
+        option.text = priorities[k];
+        select.add(option);
+      }
+      select.value = cells[i][1];
+      select.onchange = function(){recalculate()};
+      cell.appendChild(select);
+      for (j = minCell; j < maxCell; j++) {
+        data = weights[cells[i][j]];
+        cell = row.insertCell();
+        select = document.createElement("SELECT");
+        select.className = 'form-control';
+        for (k = 0; k < weights.length; k++) {
+          var option = document.createElement("OPTION");
+          option.value = k;
+          option.text = weights[k];
+          select.add(option);
+        }
+        select.value = cells[i][j];
+        select.onchange = function(){recalculate()};
+        cell.appendChild(select);
+      }
+      cell = row.insertCell();
+      delete_button = document.createElement("A");
+      delete_button.className = 'btn btn-danger';
+      delete_button.text = 'Delete';
+      delete_button.href = '/article_edit_delete_requirement/' + cells[i][0];
+      cell.appendChild(delete_button);
+    }
+
+    row = tbody.insertRow();
+    cell = row.insertCell();
+    cell.innerHTML = 'Total:';
+    for (j = 1; j < maxCell; j++) {
+      cell = row.insertCell();
+    }
+    row.insertCell();
+    recalculate();
+  }
+
+  function close_article() {
+    window.location = "/dashboard"
+  }
+
+  /*function downloadPDF() {
+    var doc = new jsPDF();
+    var specialElementHandlers = {
+        '#editor': function (element, renderer) {
+            return true;
+        }
+    };
+    //alert("PDF");
+    doc.fromHTML($('#PDFcontent').html(), 15, 15, {
+        'width': 170,
+        'elementHandlers': specialElementHandlers
+    });
+    doc.save('sample-file.pdf');
+  }*/
+
+  /*function downloadPDF() {
+    var pdf = new jsPDF('p', 'pt', 'letter');
+    // source can be HTML-formatted string, or a reference
+    // to an actual DOM element from which the text will be scraped.
+    source = $('#PDFcontent')[0];
+
+    // we support special element handlers. Register them with jQuery-style 
+    // ID selector for either ID or node name. ("#iAmID", "div", "span" etc.)
+    // There is no support for any other type of selectors 
+    // (class, of compound) at this time.
+    specialElementHandlers = {
+        // element with id of "bypass" - jQuery style selector
+        '#editor': function (element, renderer) {
+            // true = "handled elsewhere, bypass text extraction"
+            return true
+        }
+    };
+    margins = {
+        top: 80,
+        bottom: 60,
+        left: 40,
+        width: 522
+    };
+    // all coords and widths are in jsPDF instance's declared units
+    // 'inches' in this case
+    pdf.fromHTML(
+    source, // HTML string or DOM elem ref.
+    margins.left, // x coord
+    margins.top, { // y coord
+        'width': margins.width, // max width of content on PDF
+        'elementHandlers': specialElementHandlers
+    },
+
+    function (dispose) {
+        // dispose: object with X, Y of the last line add to the PDF 
+        //          this allow the insertion of new lines after html
+        pdf.save('Test.pdf');
+    }, margins);
+  }*/
+  function downloadPDF() {
+    //var doc = new jsPDF('p', 'pt');
+    var doc = new jsPDF('p', 'px', [document.getElementById("verbnoun-table").clientWidth, document.getElementById("verbnoun-table").clientHeight/3]);
+    /*var elem = document.getElementById("verbnoun-table");
+    var res = doc.autoTableHtmlToJson(elem);
+    doc.autoTable(res.columns, res.data);*/
+    var table = document.getElementById("verbnoun-table");
+    //var columns = [{title: '', dataKey: 0}}];
+    //var columns = ['', '', '', 'Loadbalancers', 'M', 'M', 'M', 'M', 'M'];
+    //var rows = [];
+    //var columns = ['', '', '', 'Loadbalancers', 'Monitoring'];
+    var columns = [];
+    var rows = [];
+    for (i = 0; i < table.rows[0].cells.length; i++) {
+      columns.push(table.rows[0].cells[i].textContent);
+      if (table.rows[0].cells[i].getAttribute('colspan') > 1) {
+        for (j = 1; j < table.rows[0].cells[i].getAttribute('colspan'); j++) {
+          columns.push('');
+        }
+      }
+    }
+    console.log(columns);
+    /*for (i = 3; i < table.rows[0].cells.length; i++) {
+      columns.push({title.title: table.rows[0].cells[i].textContent, dataKey: table.rows[0].cells[i].getAttribute('colspan')});
+    }*/
+    for (i = 1; i < table.rows.length; i++) {
+      var row = [];
+      for (j = 0; j < table.rows[i].cells.length; j++) {
+        row.push(table.rows[i].cells[j].textContent);
+      }
+      rows.push(row);
+    }
+
+    /*var base64Img = null;
+
+    imgToBase64("{{url_for('static', filename='img/xentaurs-poweredby-logo-v2.png')}}", function(base64) {
+      base64Img = base64; 
+    });*/
+
+    //var imgData = 'data:image/png;base64,'+ Base64.encode("{{url_for('static', filename='img/xentaurs-poweredby-logo-v2.png')}}");
+    //console.log(imgData);
+
+    //var pageContent = function (data) {
+        // HEADER
+        //doc.setFontSize(20);
+        //doc.setTextColor(40);
+        //doc.setFontStyle('normal');
+      //if (base64Img) {
+          //doc.addImage(base64Img, 'JPEG', data.settings.margin.left, 15, 10, 10);
+          //doc.addImage("{{url_for('static', filename='img/xentaurs-poweredby-logo-v2.png')}}", 'PNG', data.settings.margin.left, 15, 10, 10);
+        //}
+      //doc.addImage(imgData, 'PNG', data.settings.margin.left, 15, 10, 10);
+     // doc.text(7, 15, "VerbNoun - {{ customer }} - {{ article.create_date }}");
+    //}
+    doc.text(7, 15, "VerbNoun - {{ customer }} - {{ article.create_date }}");
+    doc.autoTable(columns, rows, {
+      theme: 'grid',
+      startY: 20,
+        margin: {horizontal: 7},
+        styles: {columnWidth: 'wrap'},
+        columnStyles: {text: {columnWidth: 'auto'}},
+        drawHeaderCell: function(cell, data) {
+          /*if (data.column.raw === 'Monitoring') {
+            data.column.width = data.column.width * 5;
+          } else {
+            return false;
+          }*/
+          //console.log(data);
+          //alert(data.column.raw);
+        },
+        drawRow: function (row, data) {
+          //console.log(row);
+          //console.log(data);
+          //alert("hello");
+          /*if (row.index == 0) {
+            data.doc.setTextColor(200, 0, 0);
+            data.doc.setFontStyle('bold');
+          }*/
+        },
+        createdCell: function(cell, data) {
+          if (data.row.index === 0 || data.row.index === table.rows.length-2) {
+            cell.styles.fontStyle = 'bold';
+          }
+          if (data.column.index === 2 ) {
+            cell.styles.fontStyle = 'bold';
+          }
+        },
+        headerStyles: {
+            fillColor: [144, 107, 174],
+        },
+        /*,
+        drawHeaderCell: function(cell, data) {
+          if (data.column.dataKey === 'id' || data.column.dataKey === 'first_name' || data.column.dataKey === 'email') {
+            cell.width = data.table.width / 3;
+          } else {
+            return false;
+          }
+      }*/
+    });
+    doc.save("VerbNoun - {{ customer }} - {{ article.create_date }}.pdf");
+  }
+  /*function downloadPDF() {
+    $('#verbnoun-table').tableExport({type:'pdf',escape:'false'});
+  }*/
+  function sendToCustomer(id) {
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
+    var rec_arr = [];
+
+    $.ajax({
+        type: "GET",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/verbnoun_recipients/" + id,
+            data: {},
+            success: function(response) {
+                rec_arr = JSON.parse(JSON.parse(response));
+                if (rec_arr.length > 0) {
+                  alert("VerbNoun will be sent to following users:\n- " + rec_arr.join("\n- "));
+
+                  var submitObj = {
+                  "customer": "{{ customer }}",
+                  "id": {{ article.id }},
+                  "url": window.location.href,
+                  "table": document.getElementById("PDFcontent").innerHTML
+                }
+                var body = JSON.stringify(submitObj);
+                  $.ajax({
+                    type: "POST",
+                      headers: {"Content-Type": "application/json"},
+                        url: $SCRIPT_ROOT + "/sendVN",
+                        data: body,
+                        success: function(response) {
+                            alert("VerbNoun has been successfully sent to Customer!");
+                          },
+                          error: function(response, error) {
+                              console.log(response);
+                              console.log(error);
+                            }
+                        });
+
+                } else {
+                  alert("No clients of {{ customer }} found");
+                }
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  }
+</script>

@@ -1,0 +1,48 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+.btn-primary {
+  color: #fff;
+  background-color: #906bae;
+  border-color: #694884;
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background-color: #765194;
+  border-color: #5c3f73;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  background-color: #765194;
+  box-shadow: 0 0 0 0.2rem rgba(144, 107, 174, 0.5);
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  color: #fff;
+  background-color: #906bae;
+  border-color: #4f3663;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #4f3663;
+  border-color: #4f3663;
+}
+.btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-primary.dropdown-toggle:focus {
+  background-color: #765194;
+  box-shadow: 0 0 0 0.2rem rgba(144, 107, 174, 0.5);
+}
+</style>
+    <h1>Add requirement</h1>
+    {% from "includes/_formhelpers.html" import render_field %}
+    <form method="POST" action="">
+      <div class="form-group">
+        {{ render_field(form.requirements, class_="form-control", size="20") }}
+      </div>
+      <p class="text-right"><input type="submit" class="btn btn-primary btn-right" value="Add"></p>
+    </form>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+  function deleteCategory(id) {
+    var categories = JSON.parse('{{ categoriesJSON | safe }}');
+    var components = JSON.parse('{{ componentsJSON | safe }}');
+    var categoryName = "";
+    for (i = 0; i < categories.length; i++) {
+      if (categories[i].id == id) {
+        categoryName = categories[i].name;
+        break;
+      }
+    }
+    var categoryComponents = [];
+    for (i = 0; i < components.length; i++) {
+      if (components[i].category == categoryName) {
+        categoryComponents.push(components[i].name)
+      }
+    }
+    var confirmMessage = "Do you really want to delete category \"" + categoryName + "\" and all its components?"
+    for (i = 0; i < categoryComponents.length; i++) {
+      confirmMessage = confirmMessage + "\n-" + categoryComponents[i];
+    }
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_category/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/categories";
+        },
+          error: function(response, error) {
+            console.log(response);
+          }
+      });
+      return false;
+    }
+  }
+</script>
+    <h1>Categories of components</h1>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <a class="btn btn-violet" href="/add_category">Add category</a>
+    <hr>
+    <table class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <th>Group</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for category in categories %}
+      <tr>
+        <td>{{ category.name }}</td>
+        <td>{{ category.gname }}</td>
+        <td><a href="edit_category/{{ category.id }}" class="btn btn-violet ">Edit</a></td>
+        <td><button class="btn btn-danger " onclick="deleteCategory({{ category.id }})">Delete</button></td>
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

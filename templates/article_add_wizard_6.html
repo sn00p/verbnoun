@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+th {
+  background-color: #f2f2f2;
+}
+#totalRow {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+.weight-selector option[value="0"] {
+  background: #cccccc;
+}
+.weight-selector option[value="1"] {
+  background: #ff8080;
+}
+.weight-selector option[value="2"] {
+  background: #dfff80;
+}
+.weight-selector option[value="3"] {
+  background: #9fdf9f;
+}
+</style>
+  <!-- <p><font size="3">Select customer and category > Select components > </font><font size="5">Step 3. Add Requirements</font></p> -->
+  <h2>{{ customer }}</h2>
+  <hr>
+  <a class="btn btn-violet btn-right" style="width: 200px; margin-bottom: 20px;" href="/article_add_wizard_5">< Back</a>
+  <table class="table table-bordered" id="verbnoun-table">
+  </table>
+  <p class="text-right"><a class="btn btn-violet btn-right" onclick="add_article_wizard_6_save()">Save</a></p>
+  {% include 'includes/_add_article_scripts.html' %}
+  <div style="margin-top: 20px; padding-bottom: 100px;">
+        <div style="float: left;"><a class="btn btn-violet btn-right" style="width: 200px" href="/article_add_wizard_5">< Back</a></div>
+      </div>
+  <script>window.onload = tableLoad()</script>
+{% endblock %}

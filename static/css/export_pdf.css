@@ -1,0 +1,64 @@
+h1 {
+    text-align: center;
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+table {
+    border-collapse:collapse;
+    font-family: Helvetica;
+    text-padding: 10px;
+    margin: 5px;
+}
+
+table td, table th {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+table.chosenSolutions td:first-child { font-weight: bold; }
+
+table.Products th, table.chosenSolutions th{
+    background-color: rgb(242, 242, 242);
+}
+
+.chosen-header{
+    text-align: center;
+    font-weight: bold;
+}
+
+.col_heading {
+    background-color: rgb(242, 242, 242);
+    text-align: center;
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+.pagebreak { page-break-before: always; }
+
+@page {
+  size: Letter landscape;
+  margin: 10 mm;
+  @top-left {
+        content: " ";
+        width: 100%;
+        height: 100%;
+        background: url('../img/xentaurs-poweredby-logo-v2.png') no-repeat;
+        background-position: 0 20px;
+        background-size: 15%;
+    }
+   @bottom-left-corner {
+        content: " ";
+        width: 100%;
+        height: 100%;
+        background: url('../img/left_image.png') no-repeat;
+        background-position: 0 20px;
+        background-size: 100%;
+    }
+    @bottom-right-corner {
+        content: "Page " counter(page) " of " counter(pages);
+        font-family: Helvetica;
+        font-size: 7pt;
+    }
+
+}

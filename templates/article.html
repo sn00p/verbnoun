@@ -1,0 +1,180 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.5/jspdf.debug.js" integrity="sha384-CchuzHs077vGtfhGYl9Qtc7Vx64rXBXdIAZIPbItbNyWIRTdG0oYAqki3Ry13Yzu" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.2/jspdf.plugin.autotable.js"></script>
+<!--<script type="text/javascript" src="{{ url_for('static', filename='js/tableExport.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jquery.base64.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jspdf/libs/sprintf.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/jspdf/jspdf.js') }}"></script>-->
+<script type="text/javascript" src="{{ url_for('static', filename='js/jspdf/libs/base64.js') }}"></script>
+<style>
+th {
+  background-color: #f2f2f2;
+}
+#totalRow {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+table.chosenProduct tr:first-child {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+table.chosenProduct tr:nth-child(2) {  
+  font-weight: bold;
+  background-color: rgb(242, 242, 242);
+}
+
+table.chosenProduct {
+    border-collapse:collapse;
+    font-family: Helvetica;
+}
+
+table.chosenProduct td, table.chosenProduct th {
+    border: 1px solid black;
+}
+
+
+table.productComp tr:first-child {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+table.productComp {
+    border-collapse:collapse;
+    font-family: Helvetica;
+    width: 100%;
+}
+
+table.productComp td, table.productComp th {
+    border: 1px solid black;
+}
+
+table.productComp tr:nth-child(6) {
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+  table.chosenProduct td {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+  table.chosenProduct th {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+  table.productComp td {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+    table.productComp td {
+      padding: 10px;
+      font-size: {{ font_size | safe }}pt;
+      font-family: Helvetica;
+    }
+</style>
+<script type="text/javascript">
+  function openPDF(id) {
+    var obj = {
+      "id": id
+    }
+    var body = JSON.stringify(obj);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "GET",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/openPDF/" + id,
+          data: body,
+          success: function(response) {
+              //window.location.href = "/openPDF/" + id;
+              window.open("/openPDF/" + id, '_blank');
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          }); 
+  }
+
+  function editWeights(id) {
+    var obj = {
+      "id": id
+    }
+    var body = JSON.stringify(obj);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "GET",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/check_project/" + id,
+          data: body,
+          success: function(response) {
+              window.location.href = "/article_add_wizard_6";
+            },
+            error: function(response, error) {
+                alert(JSON.parse(response.responseText).message);
+              }
+          }); 
+  }
+</script>
+  <h1>{{ customer }}</h1>
+  <h2 id="vntitle"></h2>
+  <a class="btn btn-violet btn-right" style="width: 200px" href="/dashboard">< VerbNouns</a>
+  <!--<p class="text-right">
+    <a class="btn btn-violet btn-right" onclick="downloadPDF()">&#x02913; Download PDF</a>
+    <a class="btn btn-violet btn-right" onclick="sendToCustomer()">&#9993; Send to Customer</a>
+  </p>-->
+  <div align="right">
+    <form action="/export" method="post">
+    <input type="hidden" name=id value={{ article.id }} >
+    <a class="btn btn-violet btn-right" onclick="editWeights({{ article.id }})">&#x0270D; Edit Weights</a>
+    <a class="btn btn-violet btn-right" target="_blank" onclick="openPDF({{ article.id }})">&#10001; Open PDF</a>
+    <button name="ExportBtn" type="submit" class="btn btn-violet" >&#x02913; Download PDF</button>
+    <a class="btn btn-violet btn-right" onclick="sendToCustomer({{ article.id }})">&#9993; Send to Customer</a>
+    </form>
+  </div>
+  <hr>
+
+  <table border="1" class="chosenProduct" >
+        <th colspan=2>
+          Chosen solutions
+        </th>
+        <tr>
+          <td><b>Component</b></td>
+          <td><b>Product</b></td>
+        </tr>
+        {% for cs in chosenSolutions %}
+        <tr>
+          <td>{{cs['group']}}</td>
+          <td>{{cs['product']}}</td>
+        </tr>
+        {% endfor%}
+      </table>
+
+      <br/>
+      <hr>
+      <br/>
+
+      <table class="productComp" id="productCompTable">
+      </table>
+
+      <br/>
+      <hr>
+      <br/>
+
+  <div id="PDFcontent">
+  	<table class="table table-bordered" id="verbnoun-table">
+  	</table>
+  </div>
+  <div id="editor"></div>
+  <p class="text-right"><a class="btn btn-violet btn-right" onclick="close_article()">Close</a></p>
+  {% include 'includes/_scripts.html' %}
+  <script>window.onload = load_article()</script>
+{% endblock %}

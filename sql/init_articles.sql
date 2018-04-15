@@ -1,0 +1,1 @@
+CREATE TABLE articles(id INT(11) AUTO_INCREMENT PRIMARY KEY, customer VARCHAR(100), username VARCHAR(30), body TEXT, create_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP, chosen_solutions TEXT, product_comp TEXT, project_id INT(11) NOT NULL, CONSTRAINT `fk_project` FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE ON UPDATE CASCADE) ENGINE = InnoDB;

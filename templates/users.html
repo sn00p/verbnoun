@@ -1,0 +1,54 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+  function deleteUser(id, name) {
+    if (confirm("Do you really want to delete user " + name + "?")) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_user/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/users";
+        },
+          error: function(response, error) {
+            console.log(response);
+              alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }
+</script>
+    <h1>Users</h1>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <a class="btn btn-violet" href="/add_user">Add user</a>
+    <hr>
+    <table class="table table-striped">
+      <tr>
+        <th>Name</th>
+        <th>Username</th>
+        <th>Registration Date</th>
+        <th>Role</th>
+        <th>Company</th>
+        <th>Email</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.name }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.register_date }}</td>
+        <td>{{ user.role }}</td>
+        <td>{{ user.company }}</td>
+        <td>{{ user.email }}</td>
+        <td><a class="btn btn-violet" href="/edit_user/{{user.id}}">Edit</a></td>
+        <td><a class="btn btn-danger" onclick="deleteUser({{user.id}}, '{{ user.username }}')">Delete</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

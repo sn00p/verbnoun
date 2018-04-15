@@ -1,0 +1,173 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  var edited = false;
+
+  window.onload = function() {
+    var table = document.getElementById("groupsTable");
+    document.getElementById("saveButton").style.visibility = "hidden";
+  }
+
+  function addGroup() {
+    var table = document.getElementById("groupsTable");
+    var newGroup = document.getElementById("newGroup").value;
+    if (newGroup.trim() != '') {
+      var rows = table.rows.length;
+      var row = table.insertRow(rows-1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = newGroup;
+      cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteRow(this)" style="width: 50px">X</button>';
+    }
+    document.getElementById("newGroup").value = "";
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function checkList() {
+    var list = [];
+    var table = document.getElementById("groupsTable");
+    var groups = null;
+    try {
+      groups = JSON.parse('{{ groupsJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < groups.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == groups[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    if (list.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function saveGroups() {
+    var list = [];
+    var table = document.getElementById("groupsTable");
+    var groups = null;
+    try {
+      groups = JSON.parse('{{ groupsJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < groups.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == groups[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    
+    var body = JSON.stringify(list);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/groups",
+          data: body,
+          success: function(response) {
+              window.location = "groups";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    return false;
+  }
+
+  function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById("groupsTable").deleteRow(i);
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function deleteGroup(id) {
+    var groups = JSON.parse('{{ groupsJSON | safe }}');
+    var categories = JSON.parse('{{ categoriesJSON | safe }}');
+    var groupName = "";
+    for (i = 0; i < groups.length; i++) {
+      if (groups[i].id == id) {
+        groupName = groups[i].name;
+        break;
+      }
+    }
+    var groupCategories = [];
+    for (i = 0; i < categories.length; i++) {
+      if (categories[i].gname == groupName) {
+        groupCategories.push(categories[i].name)
+      }
+    }
+    var confirmMessage = "Do you really want to delete group \"" + groupName + "\" and all its categories?"
+    for (i = 0; i < groupCategories.length; i++) {
+      confirmMessage = confirmMessage + "\n-" + groupCategories[i];
+    }
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_group/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/groups";
+        },
+          error: function(response, error) {
+            console.log(response);
+              alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }
+</script>
+    <h1>Groups of categories</h1>
+    <hr>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <table class="table table-striped" id="groupsTable">
+      <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for group in groups %}
+      <tr>
+        <td>{{ group.name }}</td>
+        <td><a href="edit_group/{{ group.id }}" class="btn btn-violet">Edit</a></td>
+        <td><button class="btn btn-danger" onclick="deleteGroup({{ group.id }})">Delete</button></td>
+      </tr>
+      {% endfor %}
+      <tr id="addRow">
+        <td><input id="newGroup" type="text" style="width: 400px"></input></td>
+        <td><button class="btn btn-add" onclick="addGroup()">Add</button></td>
+        <td></td>
+      </tr>
+    </table>
+    <div id="saveDiv" style="width: 90%; padding-bottom: 50px">
+    <button id="saveButton" class="btn btn-violet pull-right" onclick="saveGroups()">Save</button>
+    <hr>
+    </div>
+{% endblock %}

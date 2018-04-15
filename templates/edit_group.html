@@ -1,0 +1,230 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+
+	window.onload = function() {
+
+		var table = document.getElementById("categoriesTable");
+		var catList = JSON.parse('{{ categoriesJSON | safe }}');
+		if (catList.length == 0) {
+			document.getElementById("message").innerHTML = "Group doesn't contain any categories";
+		}
+
+	for (i = 0; i < catList.length; i++) {
+        var row = table.insertRow(i);
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        cell1.innerHTML = catList[i].name;
+        //cell2.innerHTML = '<button class="btn btn-danger pull-right" onclick="deleteRow(this)" style="width: 75px">Remove</button>';
+      }
+
+      /*var row = table.insertRow(table.length);
+      row.setAttribute("id", "addRow");
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = '<input id="newCategory" type="text" style="width: 400px"></input>'
+      cell2.innerHTML = '<button class="btn btn-add pull-right" style="width: 75px" onclick="addCategory()">Add</button>';
+
+      document.getElementById("saveButton").style.visibility = "hidden";*/
+	}
+
+	/*function addCategory() {
+    var table = document.getElementById("categoriesTable");
+    var newCategory = document.getElementById("newCategory").value;
+    if (newCategory.trim() != '') {
+      var rows = table.rows.length;
+      var row = table.insertRow(rows-1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = newCategory;
+      cell2.innerHTML = '<button class="btn btn-danger pull-right" onclick="deleteRow(this)">Remove</button>';
+    }
+    document.getElementById("newCategory").value = "";
+
+    if (checkList() || document.getElementById("categoriesTable").rows.length == 1) {
+    	document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+    	document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }*/
+
+  /*function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById("categoriesTable").deleteRow(i);
+
+    if (checkList()  || document.getElementById("categoriesTable").rows.length == 1) {
+    	document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+    	document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }*/
+
+  /*function checkList() {
+  	var addList = [];
+    var removeList = [];
+    var table = document.getElementById("categoriesTable");
+    var catList = JSON.parse('{{ categoriesJSON | safe }}');
+
+    for (i = 0; i < table.rows.length-1; i++) {
+      var addFlag = false;
+
+      for (j = 0; j < catList.length; j++) {
+      	var removeFlag = false;
+
+        if (table.rows[i].cells[0].innerHTML == catList[j].name) {
+          addFlag = true;
+        }
+
+        for (k = 0; k < table.rows.length-1; k++) {
+        	if (table.rows[k].cells[0].innerHTML == catList[j].name) {
+        		removeFlag = true;
+        	}
+        }
+
+        if (!removeFlag && removeList.indexOf(catList[j].name) < 0) {
+        	removeList.push(catList[j].name);
+        }
+      }
+      if (!addFlag) {
+        addList.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+    if (addList.length > 0 || removeList.length > 0) {
+    	return true;
+    } else {
+    	return false;
+    }
+  }*/
+
+  /*function saveCategories() {
+    var addList = [];
+    var removeList = [];
+    var table = document.getElementById("categoriesTable");
+    var catList = JSON.parse('{{ categoriesJSON | safe }}');
+
+    for (i = 0; i < table.rows.length-1; i++) {
+      var addFlag = false;
+
+      for (j = 0; j < catList.length; j++) {
+      	var removeFlag = false;
+
+        if (table.rows[i].cells[0].innerHTML == catList[j].name) {
+          addFlag = true;
+        }
+
+        for (k = 0; k < table.rows.length-1; k++) {
+        	if (table.rows[k].cells[0].innerHTML == catList[j].name) {
+        		removeFlag = true;
+        	}
+        }
+
+        if (!removeFlag && removeList.indexOf(catList[j].name) < 0) {
+        	removeList.push(catList[j].name);
+        }
+      }
+      if (!addFlag) {
+        addList.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    if (document.getElementById("categoriesTable").rows.length == 1) {
+    	for (i = 0; i < catList.length; i++) {
+      		removeList.push(catList[i].name);
+      	}
+    }
+
+    lists = {
+    	"group": "{{ groupName.name }}",
+    	"add": addList,
+    	"remove": removeList
+    }
+
+
+    
+    var body = JSON.stringify(lists);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/edit_group/{{groupId}}",
+          data: body,
+          success: function(response) {
+              window.location = "{{groupId}}";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    return false;
+  }*/
+  function deleteGroup() {
+    if (confirm("Do you really want to delete group \"{{ groupName.name }}\" and all its categories?")) {
+      var obj = {
+        "name": "{{ groupName.name }}",
+        "id": {{ groupId }},
+        "delete": true,
+        "rename": false
+      };
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_group/{{groupId}}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/groups";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+    }
+  }
+
+  function updateGroup() {
+    var obj = {
+        "name": document.getElementById("nameField").value,
+        "id": {{ groupId }},
+        "delete": false,
+        "rename": true
+      };
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_group/{{groupId}}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/groups";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  }
+</script>
+  <h1>Edit Group</h1>
+  <h2 id="groupName">{{ groupName.name }}</h2>
+  <h3 id="message"></h3>
+  <a class="btn btn-violet btn-right" style="width: 200px" href="/groups">< Back</a>
+  <hr>
+  <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Name</span>
+      <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px" value="{{ groupName.name }}">
+    </div>
+  <hr>
+  <h4>Categories of group:</h4>
+  <table class="table table-striped" id="categoriesTable">
+  </table>
+  <button class="btn btn-violet" onclick="updateGroup()">Save</button>
+  <button class="btn btn-danger pull-right" onclick="deleteGroup()">Delete Group</button>
+  <!--<button id="saveButton" class="btn btn-violet pull-right" style="width: 75px" onclick="saveCategories()">Save</button>-->
+{% endblock %}

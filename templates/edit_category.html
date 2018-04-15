@@ -1,0 +1,90 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  window.onload = function(){
+    document.getElementById("groupField").value = "{{ category.gname }}";
+
+    var table = document.getElementById("componentsTable");
+    var list = JSON.parse('{{ componentsJSON | safe }}');
+
+    for (i = 0; i < list.length; i++) {
+        var row = table.insertRow(i);
+        var cell1 = row.insertCell(0);
+        var cell2 = row.insertCell(1);
+        cell1.innerHTML = list[i].name;
+      }
+  }
+
+  function save() {
+  	var obj = {
+  		"name": document.getElementById("nameField").value,
+  		"group": document.getElementById("groupField").value,
+  		"delete": false
+  	};
+  	var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_category/{{ category.id }}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/categories";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  }
+
+  function deleteCategory() {
+  	if (confirm("Do you really want to delete category \"{{ category.name }}\" and all its components?")) {
+  	var obj = {
+  		"delete": true, 
+      "name": "{{ category.name }}"
+  	};
+  	var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_category/{{ category.id }}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/categories";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  	}
+  }
+</script>
+  <h1>Edit Category</h1>
+  <h2>{{category.name}}</h2>
+  <a class="btn btn-violet btn-right" style="width: 200px" href="/categories">< Back</a>
+  <hr>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Name</span>
+      <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px" value="{{category.name}}">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Group</span>
+      <select id="groupField" class="form-control" id="sel" style="width: 300px">
+        {% for group in groups: %}
+        <option value="{{group.name}}">{{group.name}}</option>>
+        {% endfor %}
+      </select>
+    </div>
+    <hr>
+    <h4>Components of category:</h4>
+    <table class="table table-striped" id="componentsTable">
+    </table>
+    <button id="saveButton" class="btn btn-violet" style="width: 75px; margin-top: 30px; margin-bottom: 50px" onclick="save()">Save</button>
+    <button id="deleteButton" class="btn btn-danger" style="width: 75px; margin-top: 30px; margin-bottom: 50px" onclick="deleteCategory()">Delete</button>
+{% endblock %}

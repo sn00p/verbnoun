@@ -1,0 +1,17 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <h1>{{ article.customer }} - {{ article.category }}</h1>
+  <hr>
+  <p>
+    <a class="btn btn-success" href="/article_edit_add_requirement">Add requirement</a>
+  </p>
+  <table class="table table-striped" id="verbnoun-table">
+  </table>
+  <p class="text-right">
+    <a class="btn btn-default btn-right" onclick="close_article()">Cancel</a>
+    <a class="btn btn-primary btn-right" onclick="update_article()">Save</a>
+  </p>
+  {% include 'includes/_scripts.html' %}
+  <script>window.onload = edit_article()</script>
+{% endblock %}

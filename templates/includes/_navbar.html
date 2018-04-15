@@ -1,0 +1,103 @@
+ <style>
+  .navbar-default {
+    background-color: #906bae;
+  }
+  .navbar-default .navbar-brand {
+    color: #ffffff;
+  }
+  .navbar-default .navbar-brand:hover,
+  .navbar-default .navbar-brand:focus {
+      color: #ffffff;
+  }
+  /* Link */
+  .navbar-default .navbar-nav > li > a {
+      color: #e6deed;
+  }
+  .navbar-default .navbar-nav > li > a:hover,
+  .navbar-default .navbar-nav > li > a:focus {
+      color: #ffffff;
+  }
+  .navbar-default .navbar-nav > .active > a,
+  .navbar-default .navbar-nav > .active > a:hover,
+  .navbar-default .navbar-nav > .active > a:focus {
+      color: #ffffff;
+      background-color: #ffffff;
+  }
+  .navbar-default .navbar-nav > .open > a,
+  .navbar-default .navbar-nav > .open > a:hover,
+  .navbar-default .navbar-nav > .open > a:focus {
+      color: #e6deed;
+      background-color: #ffffff;
+  }
+  /* Caret */
+  .navbar-default .navbar-nav > .dropdown > a .caret {
+      border-top-color: #ffffff;
+      border-bottom-color: #ffffff;
+  }
+  .navbar-default .navbar-nav > .dropdown > a:hover .caret,
+  .navbar-default .navbar-nav > .dropdown > a:focus .caret {
+      border-top-color: #ffffff;
+      border-bottom-color: #ffffff;
+  }
+  .navbar-default .navbar-nav > .open > a .caret,
+  .navbar-default .navbar-nav > .open > a:hover .caret,
+  .navbar-default .navbar-nav > .open > a:focus .caret {
+      border-top-color: #ffffff;
+      border-bottom-color: #ffffff;
+  }
+  /* Mobile version */
+  .navbar-default .navbar-toggle {
+      border-color: #ffffff;
+  }
+  .navbar-default .navbar-toggle:hover,
+  .navbar-default .navbar-toggle:focus {
+      background-color: #ffffff;
+  }
+  .navbar-default .navbar-toggle .icon-bar {
+      background-color: #ffffff;
+  }
+  @media (max-width: 767px) {
+      .navbar-default .navbar-nav .open .dropdown-menu > li > a {
+          color: #ffffff;
+      }
+      .navbar-default .navbar-nav .open .dropdown-menu > li > a:hover,
+      .navbar-default .navbar-nav .open .dropdown-menu > li > a:focus {
+            color: #ffffff;
+      }
+  }
+  </style>
+<nav class="navbar navbar-default">
+  <div class="container" id="navbar">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="sr-only">Toogle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#" style="text-shadow: 1px 1px 2px black, 0 0 1em #b59cc9;">VerbNoun</a>
+    </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav">
+        <!--<li><img src="static/img/xentaurs-poweredby-logo-v2.png"" height="50px"></img></li>-->
+        <li><img src="{{url_for('static', filename='img/xentaurs-poweredby-logo-v2.png')}}" height="50px"></img></li>
+        <li><a href="/">Home</a></li>
+        {% if session.logged_in %}
+        <li><a href="/dashboard">VN-Designer</a></li>
+        {% endif %}
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        {% if session.logged_in %}
+        {% if session['role'] != 'client' %}
+        <li><a href="/settings">Dictionaries</a></li>
+        {% endif %}
+        <li><a href="/logout">Logout</a></li>
+        {% else %}
+        <!--<li><a href="/register">Register</a></li>-->
+        <li><a href="/login">Login</a></li>
+        {% endif %}
+        <li><a href="/about">About</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>

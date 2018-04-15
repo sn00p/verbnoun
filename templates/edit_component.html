@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script type="text/javascript">
+
+  window.onload = function() {
+    document.getElementById("groupField").value = '{{ component.gname }}';
+    groupSelection();
+    document.getElementById("categoryField").value = '{{ component.category }}';
+  }
+  
+
+  function save() {
+    var obj = {
+      "id": {{ component.id }},
+      "name": document.getElementById("nameField").value,
+      "group": document.getElementById("groupField").value,
+      "category": document.getElementById("categoryField").value,
+      "link": document.getElementById("linkField").value,
+      "edit": true,
+      "delete": false
+    };
+    if (document.getElementById("nameField").value.trim() !== "") {
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_component/{{component.id}}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/components";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+    } else {
+      alert("Component name is empty!");
+    }
+  }
+
+  function deleteComponent() {
+    var obj = {
+      "id": {{ component.id }},
+      "name": document.getElementById("nameField").value,
+      "group": document.getElementById("groupField").value,
+      "category": document.getElementById("categoryField").value,
+      "link": document.getElementById("linkField").value,
+      "edit": false,
+      "delete": true
+    };
+    if (confirm("Do you really want to delete component \"{{ component.name }}\"?")) {
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_component/{{component.id}}",
+            data: body,
+            success: function(response) {
+                window.location.href = "/components";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+    }
+  }
+
+  function groupSelection() {
+    var group = document.getElementById("groupField").value;
+    var categories = JSON.parse('{{ categoriesJSON | safe}}');
+    while (document.getElementById("categoryField").options.length > 0) {
+      document.getElementById("categoryField").remove(0);
+    }
+    for (i = 0; i < categories.length; i++) {
+      if (categories[i].gname === group) {
+        var opt = document.createElement('option');
+        opt.value = categories[i].name;
+        opt.innerHTML = categories[i].name;
+        document.getElementById("categoryField").appendChild(opt);
+      }
+    }
+  }
+
+</script>
+    <h1>Edit component</h1>
+    <h2>{{ component.name }}</h2>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/components">< Back</a>
+    <hr>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Group</span>
+      <select id="groupField" class="form-control" id="sel" style="width: 300px" onchange="groupSelection()" value="{{ component.gname }}">
+        {% for group in groups: %}
+        <option value="{{group.name}}">{{group.name}}</option>>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Category</span>
+      <select id="categoryField" class="form-control" id="sel" style="width: 300px" value="{{ component.category }}">
+      </select>
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Name</span>
+      <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px" value="{{ component.name }}">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Link</span>
+      <input id="linkField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px" value="{{ component.link }}">
+    </div>
+    <hr>
+    <button id="saveButton" class="btn btn-violet" style="width: 75px; margin-top: 30px; margin-bottom: 50px" onclick="save()">Save</button>
+    <button class="btn btn-danger pull-right" onclick="deleteComponent()">Delete Component</button>
+{% endblock %}

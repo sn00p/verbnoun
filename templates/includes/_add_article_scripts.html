@@ -1,0 +1,883 @@
+editWeights<script>
+
+  var components_dictionary = JSON.parse('{{ components_list | safe }}');
+  var selectedComponents = [];
+
+  function fillBySaved(project_components) {
+    var components_selected_select = document.getElementById("components_selected");
+    var components_selected = [];
+    for (i = 0; i < project_components.length; i++) {
+      var option = document.createElement("OPTION");
+      option.text = project_components[i][0] + ":";
+      components_selected_select.add(option);
+      for (j = 1; j < project_components[i].length; j++) {
+          var option = document.createElement("OPTION");
+          option.text = "- " + project_components[i][j];
+          components_selected_select.add(option);
+
+          for (k = 0; k < components_dictionary.length; k++) {
+            if (components_dictionary[k]['name'] == project_components[i][j] && components_dictionary[k]['category'] == project_components[i][0]) {
+              var obj = {
+                "group": components_dictionary[k]['gname'],
+                "category": components_dictionary[k]['category'],
+                "name": components_dictionary[k]['name'],
+                "id": components_dictionary[k]['id'],
+                "link": components_dictionary[k]['link']
+              };
+              selectedComponents.push(obj);
+          }
+        }
+      }
+    }
+  }
+
+  function add_article_wizard_2_onload() {
+    var project_components = null;
+    try {
+      project_components = JSON.parse('{{ project_components | safe }}');
+    } catch (err) {}
+    if (project_components != null) {
+      fillBySaved(project_components);
+    }
+
+    var groups_selector = document.getElementById("groups");
+    var groups = [];
+    var categories = [];
+    var names = [];
+    for (i = 0; i < components_dictionary.length; i++) {
+      group = components_dictionary[i]['gname'];
+      category = components_dictionary[i]['category'];
+      name = components_dictionary[i]['name'];
+      if (groups.includes(group) == false) { groups.push(group) }
+      if (categories.includes(category) == false) { categories.push(category) }
+      if (names.includes(name) == false) { names.push(name) }
+    }
+
+    for (i = 0; i < groups.length; i++) {
+      var option = document.createElement("OPTION");
+      option.value = i;
+      option.text = groups[i];
+      groups_selector.add(option);
+    }
+  }
+
+  function add_article_wizard_2_groups() {
+    var groups_select = document.getElementById("groups");
+    var categories_select = document.getElementById("categories");
+    var groups_options = groups_select && groups_select.options;
+    var selected_groups = [];
+    var categories = [];
+
+    for (i = 0; i < groups_options.length; i++) {
+      if (groups_options[i].selected) {
+        selected_groups.push(groups_options[i].text);
+      }
+    }
+
+    for (i = 0; i < components_dictionary.length; i++) {
+      if (selected_groups.includes(components_dictionary[i].gname)) {
+        if (categories.includes(components_dictionary[i].category)  == false) {
+          categories.push(components_dictionary[i].category);
+        }
+      }
+    }
+    categories_select_length = categories_select.children.length;
+    for (i = 0; i < categories_select_length; i++) {
+      categories_select.remove(categories_select.children[i]);
+    }
+
+    for (i = 0; i < categories.length; i++) {
+      var option = document.createElement("OPTION");
+      option.value = i;
+      option.text = categories[i];
+      categories_select.add(option);
+    }
+  }
+
+  function add_article_wizard_2_categories() {
+    var categories_select = document.getElementById("categories");
+    var components_select = document.getElementById("components");
+    var categories_options = categories_select && categories_select.options;
+    var selected_categories = [];
+    var components = [];
+
+    for (i = 0; i < categories_options.length; i++) {
+      if (categories_options[i].selected) {
+        selected_categories.push(categories_options[i].text);
+      }
+    }
+
+    for (i = 0; i < components_dictionary.length; i++) {
+      if (selected_categories.includes(components_dictionary[i].category)) {
+        components.push(components_dictionary[i]);
+      }
+    }
+
+    components_select_length = components_select.children.length;
+    for (i = 0; i < components_select_length; i++) {
+      components_select.remove(components_select.children[i]);
+    }
+
+    for (i = 0; i < selected_categories.length; i++) {
+      var option = document.createElement("OPTION");
+      option.text = selected_categories[i] + ":";
+      components_select.add(option);
+      for (j = 0; j < components.length; j++) {
+        if (components[j].category == selected_categories[i]) {
+          var option = document.createElement("OPTION");
+          option.text = "- " + components[j].name;
+          components_select.add(option);
+        }
+      }
+    }
+  }
+
+  function add_article_wizard_2_add() {
+    var components_select = document.getElementById("components");
+    var components_selected_select = document.getElementById("components_selected");
+    var components_options = components_select && components_select.options;
+    var components_selected_options = components_selected_select && components_selected_select.options;
+    var categories = [];
+    var components_selected = [];
+
+    for (i = 0; i < components_options.length; i++) {
+      if (components_options[i].text.endsWith(":")) {
+        var category = components_options[i].text.replace(/:$/, "");
+      }
+      if (components_options[i].selected) {
+        for (j = 0; j < components_dictionary.length; j++) {
+          if (components_dictionary[j].category == category) {
+            var name = components_options[i].text.replace(/^- /, "");
+            if (components_dictionary[j].name == name) {
+              if (categories.includes(category) == false) {
+                categories.push(category);
+              }
+              components_selected.push(components_dictionary[j]);
+            }
+          }
+        }
+      }
+    }
+
+    for (i = 0; i < components_selected_options.length; i++) {
+      if (components_selected_options[i].text.endsWith(":")) {
+        var category = components_selected_options[i].text.replace(/:$/, "");
+        if (categories.includes(category) == false) {
+          categories.push(category);
+        }
+      } else {
+        var name = components_selected_options[i].text.replace(/^- /, "");
+        for (j = 0; j < components_dictionary.length; j++) {
+          if (components_dictionary[j].category == category) {
+            if (components_dictionary[j].name == name) {
+              components_selected.push(components_dictionary[j]);
+            }
+          }
+        }
+      }
+    }
+
+    components_selected_select_length = components_selected_select.children.length;
+    for (i = 0; i < components_selected_select_length; i++) {
+      components_selected_select.remove(components_selected_select.children[i]);
+    }
+
+    for (i = 0; i < categories.length; i++) {
+      var option = document.createElement("OPTION");
+      option.text = categories[i] + ":";
+      components_selected_select.add(option);
+      for (j = 0; j < components_selected.length; j++) {
+        if (components_selected[j].category == categories[i]) {
+          var option = document.createElement("OPTION");
+          option.text = "- " + components_selected[j].name;
+          components_selected_select.add(option);
+        }
+      }
+    }
+    selectedComponents = components_selected;
+  }
+
+  function add_article_wizard_2_remove() {
+    var components_selected_select = document.getElementById("components_selected");
+    var components_selected_options = components_selected_select && components_selected_select.options;
+    var components_selected = [];
+    var categories = [];
+
+    for (i = 0; i < components_selected_options.length; i++) {
+      if (components_selected_options[i].selected == false) {
+        if (components_selected_options[i].text.endsWith(":")) {
+          var category = components_selected_options[i].text.replace(/:$/, "");
+          if (categories.includes(category) == false) {
+            categories.push(category);
+          }
+        } else {
+          for (j = 0; j < components_dictionary.length; j++) {
+            var component = components_dictionary[j];
+            var name = components_selected_options[i].text.replace(/^- /, "");
+            if (component.category == category && component.name == name) {
+              components_selected.push(component);
+            }
+          }
+        }
+      }
+      selectedComponents = components_selected;
+    }
+
+    components_selected_select_length = components_selected_select.children.length;
+    for (i = 0; i < components_selected_select_length; i++) {
+      components_selected_select.remove(components_selected_select.children[i]);
+    }
+
+    for (i = 0; i < categories.length; i++) {
+      for (j = 0; j < components_selected.length; j++) {
+        if (components_selected[j].category == categories[i]) {
+          var option = document.createElement("OPTION");
+          option.text = categories[i] + ":";
+          components_selected_select.add(option);
+          break;
+        }
+      }
+      for (j = 0; j < components_selected.length; j++) {
+        if (components_selected[j].category == categories[i]) {
+          option = document.createElement("OPTION");
+          option.text = "- " + components_selected[j].name;
+          components_selected_select.add(option);
+        }
+      }
+    }
+  }
+
+  function submitComponents() {
+    var submitObj = [];
+    var processedCategories = [];
+    for (i = 0; i < selectedComponents.length; i++) {
+      var arr = [];
+      if (processedCategories.indexOf(selectedComponents[i].category) == -1) {
+        processedCategories.push(selectedComponents[i].category);
+        arr.push(selectedComponents[i].category);
+        for (j = 0; j < selectedComponents.length; j++) {
+          if (selectedComponents[j].category == arr[0]) {
+            arr.push(selectedComponents[j].name);
+          }
+        }
+        submitObj.push(arr);
+      }
+    }
+    var body = JSON.stringify(submitObj);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/article_add_wizard_2",
+          data: body,
+          success: function(response) {
+              //console.log(response);
+              window.location = "article_add_wizard_3";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    return false;
+  }
+
+  function tableLoad() {
+    var vn = [];
+
+    try {
+      var vn = JSON.parse('{{ project_vn | safe }}');
+    } catch (error) {
+
+    }
+
+    var table = document.getElementById("verbnoun-table");
+
+    var components = JSON.parse('{{ componentsJSON | safe }}');
+    var requirements = JSON.parse('{{ requirementsJSON | safe }}');
+    var priorities = ['', 'Nice to have', 'Whish list', 'Based on Policy', 'Best Practice', 'Must have'];
+    var weights = ['N/A', 'No', 'Partial', 'Yes'];
+
+    // Row 1
+    var row = table.insertRow();
+    var header = document.createElement("TH");
+    row.appendChild(header);
+
+    header = document.createElement("TH");
+    row.appendChild(header);
+
+    header = document.createElement("TH");
+    row.appendChild(header);
+
+    for (i = 0; i < components.length; i++) {
+      header = document.createElement("TH");
+      // header.innerHTML = components[i][0];
+      header.colSpan = components[i].length - 1;
+      var paragraph = document.createElement("P");
+      paragraph.className = 'text-center';
+      paragraph.innerHTML = components[i][0];
+      header.appendChild(paragraph);
+      row.appendChild(header);
+    }
+
+    // Row 2
+    row = table.insertRow();
+    var header = document.createElement("TH");
+    header.innerHTML = "R#";
+    row.appendChild(header);
+
+    header = document.createElement("TH");
+    header.innerHTML = "Requirement";
+    row.appendChild(header);
+
+    header = document.createElement("TH");
+    header.innerHTML = "Priority";
+    row.appendChild(header);
+
+    for (i = 0; i < components.length; i++) {
+      for (j = 1; j < components[i].length; j++) {
+        header = document.createElement("TH");
+        header.innerHTML = components[i][j];
+        row.appendChild(header);
+      }
+    }
+
+    // Requirements
+    for (i = 0; i < requirements.length; i++) {
+      var requirement_number = 0;
+      for (j = 1; j < requirements[i].length; j++) {
+        requirement_number++;
+        var label = "";
+        if (requirements[i][0] == 'Business requirements') { label = "BR"; }
+        if (requirements[i][0] == 'Technical requirements') { label = "TR"; }
+        if (requirements[i][0] == 'Governance requirements') { label = "GR"; }
+        row = table.insertRow();
+        var cell = row.insertCell();
+        cell.setAttribute("class", "reqNumber");
+        cell.innerHTML = '<b>' + label + requirement_number.toString() + '</b>';
+        cell = row.insertCell();
+        cell.innerHTML = requirements[i][j];
+
+        // Priorities selector
+        var cell = row.insertCell();
+        select = document.createElement("SELECT");
+        select.className = 'form-control';
+        select.onchange = function(){tableRecalculate()};
+        for (k = 1; k < priorities.length; k++) {
+          var option = document.createElement("OPTION");
+          option.value = k;
+          option.text = priorities[k];
+          select.add(option);
+        }
+        cell.appendChild(select);
+
+        //Weight selector
+        for (k = 0; k < components.length; k++) {
+          for (l = 1; l < components[k].length; l++) {
+            cell = row.insertCell();
+            select = document.createElement("SELECT");
+            select.className = 'form-control weight-selector';
+            select.onchange = function(){tableRecalculate()};
+            for (m = 0; m < weights.length; m++) {
+              var option = document.createElement("OPTION");
+              option.value = m;
+              option.text = weights[m];
+              select.add(option);
+            }
+            cell.appendChild(select);
+          }
+        }
+      }
+
+      //Subtotal
+      subTotalRow = table.insertRow();
+      subTotalRow.style = "background-color: #f2f2f2; font-weight: bold;";
+      firstCell = subTotalRow.insertCell();
+      cellSubtotal = subTotalRow.insertCell();
+      //cellSubtotal.colSpan = 2;
+      //cellSubtotal.setAttribute("align", "center");
+      cellSubtotal.innerHTML = "<b>Subtotal:</b>"
+      cellPriority = subTotalRow.insertCell();
+      for (k = 0; k < components.length; k++) {
+          for (l = 1; l < components[k].length; l++) {
+            cell = subTotalRow.insertCell();
+          }
+        }
+
+      // Priorities selector
+      /*var cell = row.insertCell();
+      select = document.createElement("SELECT");
+      select.className = 'form-control';
+      select.onchange = function(){tableRecalculate()};
+      for (k = 1; k < priorities.length; k++) {
+        var option = document.createElement("OPTION");
+        option.value = k;
+        option.text = priorities[k];
+        select.add(option);
+      }
+      cell.appendChild(select);*/
+
+      /*for (j = 0; j < components.length; j++) {
+        for (k = 1; k < components[0].length; k++) {
+          cell = row.insertCell();
+          select = document.createElement("SELECT");
+          select.className = 'form-control';
+          select.onchange = function(){tableRecalculate()};
+          for (l = 0; l < weights.length; l++) {
+            var option = document.createElement("OPTION");
+            option.value = l;
+            option.text = weights[l];
+            select.add(option);
+          }
+          cell.appendChild(select);
+        }
+      }*/
+    }
+
+    // Last row
+    row = table.insertRow();
+    row.setAttribute("id", "totalRow");
+    cell = row.insertCell();
+    cell = row.insertCell();
+    cell.innerHTML = 'Total:';
+
+    for (i = 2; i < table.rows[2].cells.length; i++) {
+      cell = row.insertCell();
+    }
+
+
+    for (i = 2; i < table.rows.length; i++) {
+      for (j = 0; j < vn.length; j++) {
+        if (table.rows[i].cells[1].innerHTML == vn[j].req) {
+          table.rows[i].cells[2].children[0].value = Number.parseInt(vn[j].priority);
+
+          for (k = 3; k < table.rows[i].cells.length; k++) {
+            for (l = 0; l < vn[j].weights.length; l++) {
+              if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c) {
+                table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+              }
+            }
+          }
+        }
+      }
+    }
+
+
+    tableRecalculate();
+  }
+
+  function tableRecalculate() {
+    var table = document.getElementById("verbnoun-table");
+    var total_priority = 0;
+    var total_weights = [];
+    //var row = table.rows[table.rows.length - 1];
+    var row = document.getElementById("totalRow");
+
+    var subtotal_priority = 0;
+    var subtotal_weights = [];
+    for (i = 2; i < table.rows.length - 1; i++) {
+      if (table.rows[i].cells[1].innerHTML.indexOf("Subtotal") < 0) {
+        total_priority += parseInt(table.rows[i].cells[2].children[0].value);
+        subtotal_priority += parseInt(table.rows[i].cells[2].children[0].value);
+      } else {
+        table.rows[i].cells[2].innerHTML = subtotal_priority;
+        subtotal_priority = 0;
+      }
+    }
+
+    row.cells[2].innerHTML = total_priority.toString();
+
+    for (i = 0; i < table.rows[2].cells.length; i++) {
+      total_weights.push(0);
+      subtotal_weights.push(0);
+    }
+
+    for (i = 2; i < table.rows.length - 1; i++) {
+      if (table.rows[i].cells[1].innerHTML.indexOf("Subtotal") < 0) {
+        for (j = 3; j < table.rows[2].cells.length; j++) {
+          priority = parseInt(table.rows[i].cells[2].children[0].value);
+          weight = parseInt(table.rows[i].cells[j].children[0].value);
+          //total_weights[j] += priority * weight * .5
+          //subtotal_weights[j] += priority * weight * .5
+          total_weights[j] += priority * getWeight(weight);
+          subtotal_weights[j] += priority * getWeight(weight);
+        }
+      } else {
+        for (j = 3; j < table.rows[2].cells.length; j++) {
+          table.rows[i].cells[j].innerHTML = subtotal_weights[j];
+          subtotal_weights[j] = 0;
+        }
+      }
+    }
+
+    for (i = 3; i < table.rows[2].cells.length; i++) {
+      row.cells[i].innerHTML = total_weights[i].toString();
+    }
+
+    var sels = document.getElementsByClassName("weight-selector");
+    for (i = 0; i < sels.length; i++) {
+      //sels[i].style.background
+      if (sels[i].value == 0) {
+        sels[i].style.background = "rgba(100, 100, 100, 0.3)";
+      } else if (sels[i].value == 1) {
+        sels[i].style.background = "rgba(255, 0, 0, 0.3)";
+      } else if (sels[i].value == 2) {
+        sels[i].style.background = "rgba(255, 255, 0, 0.3)";
+      } else if (sels[i].value == 3) {
+        sels[i].style.background = "rgba(0, 255, 0, 0.3)";
+      }
+    }
+  }
+
+  function getWeight(index) {
+    if (index == 0) {
+      return 0;
+    } else if (index == 1) {
+      return 0;
+    } else if (index == 2) {
+      return 0.5;
+    } else if (index == 3) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+
+  function add_article_wizard_6_save() {
+    var table = document.getElementById("verbnoun-table");
+    var components = JSON.parse('{{ componentsJSON | safe }}');
+    var requirements = JSON.parse('{{ requirementsJSON | safe }}');
+
+    var cells = [];
+
+    var c = 0;
+    for (i = 0; i < table.rows.length; i++) {
+      if (table.rows[i].cells[1].innerHTML.indexOf("Subtotal") < 0) {
+      var row = table.rows[i];
+      cells.push([]);
+      for (j = 0; j < row.cells.length; j++) {
+        var cell = row.cells[j];
+        if (i == 0) {
+          if (j < 3) {
+            cells[c].push("");
+          } else {
+            cells[c].push(cell.children[0].innerHTML);
+            cells[c].push(cell.colSpan);
+          }
+        } else if (i == 1) {
+          cells[c].push(cell.innerHTML);
+        } else if (i < table.rows.length - 1) {
+          if (j < 2) {
+            cells[c].push(cell.innerHTML);
+          } else {
+            cells[c].push(cell.children[0].value);
+          }
+        } else {
+            cells[c].push(cell.innerHTML);
+        }
+      }
+      c++;
+    } 
+    }
+
+    //cells
+    var dataObject = [];
+    var subtotalWeights = [];
+    var reqSubtotalWeights = null;
+    for (i = 2; i < table.rows.length-1; i++) {
+      if (table.rows[i].cells[1].innerHTML.indexOf("Subtotal") < 0) {
+      var weights = [];
+      for (j = 3; j < table.rows[i].cells.length; j++) {
+        var weight = {
+          "c": table.rows[1].cells[j].innerHTML,
+          "w": table.rows[i].cells[j].children[0].value
+        }
+        weights.push(weight);
+      }
+      var req = {
+        "req": table.rows[i].cells[1].innerHTML,
+        "priority": table.rows[i].cells[2].children[0].value,
+        "weights": weights
+      };
+      dataObject.push(req);
+    } else {
+        var arr = [];
+        for (j = 3; j < table.rows[i].cells.length; j++) {
+          arr.push(Number.parseFloat(table.rows[i].cells[j].innerHTML));
+        }
+        subtotalWeights.push(arr);
+      }
+    }
+
+    if (subtotalWeights.length == 3) {
+      reqSubtotalWeights = {
+        "business": subtotalWeights[0],
+        "technical": subtotalWeights[1],
+        "governance": subtotalWeights[2]
+      };
+      //productComp.business.weights = subtotalWeights[0];
+      //productComp.governance.weights = subtotalWeights[1];
+      //productComp.technical.weights = subtotalWeights[2];
+    } else {
+      var b_arr = [];
+      var t_arr = [];
+      var g_arr = [];
+      if (requirements[0].length > 1) {
+        b_arr = subtotalWeights[0];
+        //productComp.business.weights = b_arr;
+      }
+      if (requirements[1].length > 1) {
+        t_arr = subtotalWeights[1];
+        //productComp.governance.weights = g_arr;
+      }
+      if (requirements[2].length > 1) {
+        g_arr = subtotalWeights[2];
+        //productComp.technical.weights = t_arr;
+      }
+      reqSubtotalWeights = {
+        "business": b_arr,
+        "technical": t_arr,
+        "governance": g_arr
+      };
+    }
+
+    //components refactoring
+    var groupData = [];
+    var totalRow = document.getElementById('totalRow');
+    
+    
+    var hIndex = 3;
+    var rIndex = 0;
+    for (i = 0; i < components.length; i++) {
+      var group = components[i][0];
+      var comps = [];
+      for (j = 1; j < components[i].length; j++) {
+
+        var b = 0;
+        var t = 0;
+        var g = 0;
+
+        //productComp.total.weights.push(Number.parseFloat(totalRow.cells[hIndex].innerHTML));
+
+        if (reqSubtotalWeights.business.length > 0 ) {
+          b = Number.parseFloat(reqSubtotalWeights.business[rIndex]);
+        }
+        if (reqSubtotalWeights.technical.length > 0 ) {
+          t = Number.parseFloat(reqSubtotalWeights.technical[rIndex]);
+        }
+        if (reqSubtotalWeights.governance.length > 0 ) {
+          g = Number.parseFloat(reqSubtotalWeights.governance[rIndex]);
+        }
+
+        comps.push({
+          "name": components[i][j],
+          "totalWeight": Number.parseFloat(totalRow.cells[hIndex].innerHTML),
+          "businessWeight": b,
+          "technicalWeight": t,
+          "governanceWeight": g
+        });
+        hIndex++;
+        rIndex++;
+      }
+      var gd = {
+        "group": components[i][0],
+        "components": comps
+      }
+      groupData.push(gd);
+    }
+
+    //Chosen Solutions
+    var chosenSolutions = [];
+    
+    for (i = 0; i < groupData.length; i++) {
+      var gd = groupData[i];
+      var group = groupData[i].group;
+      var product = {
+        "n": groupData[i].components[0].name,
+        "w": groupData[i].components[0].totalWeight
+      };
+      for (j = 0; j < groupData[i].components.length; j++) {
+        if (groupData[i].components[j].totalWeight > product.w) {
+          product = {
+            "n": groupData[i].components[j].name,
+            "w": groupData[i].components[j].totalWeight
+          };
+        }
+      }
+      chosenSolutions.push({
+        "group": group,
+        "product": product.n
+      });
+    }
+
+
+    //Product comparsion
+    var productComp = {
+      "products": [],
+      "business": {
+        "weights": [],
+        "max": []
+      },
+      "technical": {
+        "weights": [],
+        "max": []
+      },
+      "governance": {
+        "weights": [],
+        "max": []
+      },
+      "total": {
+        "weights": [],
+        "max": []
+      }
+    };
+
+    var preProductComp = {
+      "business": {
+        "weights": [],
+        "max": []
+      },
+      "technical": {
+        "weights": [],
+        "max": []
+      },
+      "governance": {
+        "weights": [],
+        "max": []
+      },
+      "total": {
+        "weights": [],
+        "max": []
+      }
+    };
+
+    //Product comparsions
+    //var preProductComp = Object.assign({}, productComp);
+    for (i = 3; i < table.rows[1].cells.length; i++) {
+      productComp.products.push(table.rows[1].cells[i].innerHTML);
+    }
+
+    for (i = 0; i < groupData.length; i++) {
+      var ba = [];
+      var ta = [];
+      var ga = [];
+      var tota = [];
+
+      var bm = [];
+      var tm = [];
+      var gm = [];
+      var totm = [];
+
+      for (j = 0; j < groupData[i].components.length; j++) {
+        ba.push(groupData[i].components[j].businessWeight);
+        ta.push(groupData[i].components[j].technicalWeight);
+        ga.push(groupData[i].components[j].governanceWeight);
+        tota.push(groupData[i].components[j].totalWeight);
+      }
+
+      preProductComp.business.weights.push(ba);
+      preProductComp.technical.weights.push(ta);
+      preProductComp.governance.weights.push(ga);
+      preProductComp.total.weights.push(tota);
+
+      preProductComp.business.max.push(Math.max.apply(null, ba));
+      preProductComp.technical.max.push(Math.max.apply(null, ta));
+      preProductComp.governance.max.push(Math.max.apply(null, ga));
+      preProductComp.total.max.push(Math.max.apply(null, tota));
+    }
+
+    var bIndex = 0;
+    for (i = 0; i < preProductComp.business.weights.length; i++) {
+      for (j = 0; j < preProductComp.business.weights[i].length; j++) {
+        productComp.business.weights.push(preProductComp.business.weights[i][j]);
+
+        if (preProductComp.business.weights[i][j] == preProductComp.business.max[i]) {
+          productComp.business.max.push(bIndex);
+        }
+        bIndex++;
+      }
+    }
+
+    var tIndex = 0;
+    for (i = 0; i < preProductComp.technical.weights.length; i++) {
+      for (j = 0; j < preProductComp.technical.weights[i].length; j++) {
+        productComp.technical.weights.push(preProductComp.technical.weights[i][j]);
+
+        if (preProductComp.technical.weights[i][j] == preProductComp.technical.max[i]) {
+          productComp.technical.max.push(tIndex);
+        }
+        tIndex++;
+      }
+    }
+
+    var gIndex = 0;
+    for (i = 0; i < preProductComp.governance.weights.length; i++) {
+      for (j = 0; j < preProductComp.governance.weights[i].length; j++) {
+        productComp.governance.weights.push(preProductComp.governance.weights[i][j]);
+
+        if (preProductComp.governance.weights[i][j] == preProductComp.governance.max[i]) {
+          productComp.governance.max.push(gIndex);
+        }
+      gIndex++;
+      }
+    }
+
+    var totIndex = 0;
+    for (i = 0; i < preProductComp.total.weights.length; i++) {
+      for (j = 0; j < preProductComp.total.weights[i].length; j++) {
+        productComp.total.weights.push(preProductComp.total.weights[i][j]);
+
+        if (preProductComp.total.weights[i][j] == preProductComp.total.max[i]) {
+          productComp.total.max.push(totIndex);
+        }
+        totIndex++;
+      }
+    }
+
+
+    var obj = {
+      "cells": cells,
+      "project": dataObject,
+      "chosenSolutions": chosenSolutions,
+      "productComp": productComp
+    }
+    console.log(obj);
+    var body = JSON.stringify(obj);
+
+    var article_id = "{{article_id}}";
+    if (article_id != "0") {
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/article_add_wizard_6",
+          data: body,
+          success: function(response) {
+              window.location.href = "/article/{{article_id}}";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    } else {
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/article_add_wizard_6",
+          data: body,
+          success: function(response) {
+              window.location.href = "/newarticle";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    }
+    return false;
+
+  }
+</script>

@@ -1,0 +1,34 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+    .btn-violet {
+      width: 120px;
+    }
+    </style>
+    <h1>Dictionaries</h1>
+    <table class="table">
+      <tr>
+        <td><a class="btn btn-violet" href="/customers">Customers</a></td>
+        <td>Manipulate with customer dictionary</td>
+      </tr>
+      <tr>
+        <td><a class="btn btn-violet" href="/groups">Groups</a></td>
+        <td>Manipulate with groups dictionary</td>
+      </tr>
+      <tr>
+        <td><a class="btn btn-violet" href="/categories">Categories</a></td>
+        <td>Manipulate with categories of components dictionary</td>
+      </tr>
+      <tr>
+        <td><a class="btn btn-violet" href="/components">Components</a></td>
+        <td>Manipulate with components dictionary</td>
+      </tr>
+      {% if (role == "admin"): %}
+      <tr>
+        <td><a class="btn btn-violet" href="/users">Users</a></td>
+        <td>Manipulate with users</td>
+      </tr>
+      {% endif %}
+    </table>
+{% endblock %}

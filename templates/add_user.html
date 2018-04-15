@@ -1,0 +1,95 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  function saveUser() {
+    var flag = false;
+    var obj = {
+      "name": document.getElementById("nameField").value,
+      "username": document.getElementById("usernameField").value,
+      "email": document.getElementById("emailField").value,
+      "role": document.getElementById("roleField").value,
+      "company": document.getElementById("companyField").value,
+      "password": "",
+    };
+
+    if (document.getElementById("nameField").value.trim() != "" && document.getElementById("usernameField").value.trim() != "" && document.getElementById("emailField").value.trim() != "" && document.getElementById("roleField").value != "" && document.getElementById("companyField").value != "") {
+
+      if (document.getElementById("passwordField").value != "") {
+        if (document.getElementById("passwordField").value == document.getElementById("confirmField").value) {
+          obj.password = document.getElementById("passwordField").value;
+          flag = true;
+        } else {
+          alert("The passwords you entered do not match");
+        }
+      } else {
+        flag = true;
+      }
+    } else {
+      alert("Not all fields are filled!");
+    }
+
+    if (flag) {
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/add_user",
+            data: body,
+            success: function(response) {
+                window.location.href = "/users";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      console.log(obj);
+      return false;
+    }
+  }
+
+</script>
+    <h1 id="h1">Add user</h1>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/users">< Back</a>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Name</span>
+      <input id="nameField" type="text" class="form-control" style="width: 300px" aria-describedby="basic-addon1">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Username</span>
+      <input id="usernameField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Email</span>
+      <input id="emailField" type="text" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Role</span>
+      <select id="roleField" class="form-control" id="sel" style="width: 300px">
+        <option value="client">client</option>
+        <option value="employee">employee</option>
+        <option value="admin">admin</option>
+      </select>
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Company</span>
+      <select id="companyField" class="form-control" id="sel" style="width: 300px">
+        <option value="Xentaurs">Xentaurs</option>
+        {% for customer in customers: %}
+        <option value="{{customer['name']}}">{{customer['name']}}</option>>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Password</span>
+      <input id="passwordField" type="password" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+    </div>
+    <div class="input-group" style="margin-top: 20px;">
+      <span class="input-group-addon" style="width: 150px">Confirm</span>
+      <input id="confirmField" type="password" class="form-control" aria-describedby="basic-addon1" style="width: 300px">
+    </div>
+
+    <button id="saveButton" class="btn btn-violet" style="width: 75px; margin-top: 30px; margin-bottom: 50px" onclick="saveUser()">Save</button>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  function deleteVN(id) {
+    var vnJSON = JSON.parse('{{ vnJSON | safe }}');
+    var vn = null;
+    for (i = 0; i < vnJSON.length; i++) {
+      if (vnJSON[i].id == id) {
+        vn = vnJSON[i];
+      }
+    }
+    var obj = {
+      "id": vn.id,
+      "customer": vn.customer,
+      "username": vn.username,
+      "delete": true,
+      "edit": false
+    };
+    if (confirm("Do you really want to delete VerbNoun \""+vn.customer+"\" by "+vn.username+"?")) {
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/dashboard",
+            data: body,
+            success: function(response) {
+                window.location.href = "/dashboard";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+    }
+  }
+
+  function editVN(id) {
+    var vnJSON = JSON.parse('{{ vnJSON | safe }}');
+    var vn = null;
+    for (i = 0; i < vnJSON.length; i++) {
+      if (vnJSON[i].id == id) {
+        vn = vnJSON[i];
+      }
+    }
+    var obj = {
+      "id": vn.id,
+      "customer": vn.customer,
+      "username": vn.username,
+      "delete": false,
+      "edit": true
+    };
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/dashboard",
+            data: body,
+            success: function(response) {
+                window.location.href = "/article_add_wizard_1";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+      return false;
+  }
+
+  function checkProject(id) {
+    var obj = {};
+    var body = JSON.stringify(obj);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      url: $SCRIPT_ROOT + "/check_project/" + id,
+      data: body,
+      success: function(response) {
+        window.location.href = "/article_add_wizard_1";
+      },
+        error: function(response, error) {
+          console.log(response);
+            alert(JSON.parse(response.responseText).message);
+        }
+    });
+    return false;
+  }
+
+  function newVN() {
+    var obj = {};
+    var body = JSON.stringify(obj);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      url: $SCRIPT_ROOT + "/close_my_projects",
+      data: body,
+      success: function(response) {
+        window.location.href = "/article_add_wizard_1";
+      },
+        error: function(response, error) {
+          console.log(response);
+            alert(JSON.parse(response.responseText).message);
+        }
+    });
+    return false;
+  }
+</script>
+    <h1>VerbNoun List</h1>
+    {% if session['role'] != 'client' %}
+    <a class="btn btn-violet" onclick="newVN()">Add VerbNoun</a>
+    {% endif %}
+    <hr>
+    <table class="table table-striped">
+      <tr>
+        <th>Company</th>
+        <th>Author</th>
+        <th>Created</th>
+        <th></th>
+        {% if session['role'] != 'client' %}
+        <th></th>
+        <th></th>
+        {% endif %}
+      </tr>
+      {% for article in articles %}
+      <tr>
+        <td>{{ article.customer }}</td>
+        <td>{{ article.username }}</td>
+        <td>{{ article.create_date }}</td>
+        <td><a href="article/{{ article.id }}" class="btn btn-violet">Open</a></td>
+        {% if session['role'] != 'client' %}
+        <!--<td><a onclick="editVN({{article.id}})" class="btn btn-violet">Edit</a></td>-->
+        <td><a onclick="checkProject({{article.id}})" class="btn btn-violet">Edit</a></td>
+        <td><a onclick="deleteVN({{article.id}})" class="btn btn-danger">Delete</a></td>
+        {% endif %}
+        <!--<td><a href="#" onclick="openVN({{ article.id }})" class="btn btn-default pull-right">Open</a></td>-->
+        <!--<td><a href="article_edit/{{ article.id }}" class="btn btn-info">Edit</a></td>-->
+      </tr>
+      {% endfor %}
+    </table>
+{% endblock %}

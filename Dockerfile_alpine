@@ -1,0 +1,13 @@
+FROM python:3.6.4-alpine3.7
+
+RUN apk --update add --no-cache g++ libffi libffi-dev
+
+RUN pip install pandas
+#COPY requirements_aspine.txt .
+#RUN pip install -r requirements_aspine.txt
+
+COPY . .
+
+EXPOSE 8080
+CMD ["app.py"]
+#CMD ["uwsgi", "--ini", "conf.ini"]

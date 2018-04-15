@@ -1,0 +1,35 @@
+<html>
+
+  <head>
+    <meta charset="utf-8">
+    <title>VerbNoun</title>
+  </head>
+  <body>
+  	<style>
+  	@page:first {
+    	@top-right {
+        	content: " ";
+    	}
+  	}
+  	@page {
+    @top-right {
+        content: "{{ customer | safe }} VerbNoun";
+        font-family: Helvetica;
+        font-size: 11pt;
+        color: #808080;
+    }
+    @bottom-center {
+        content: "VerbNoun {{ date | safe }}";
+        font-family: Helvetica;
+        color: #808080;
+    }
+  }
+  table td, table th {
+      font-size: {{ font_size | safe }}pt;
+    }
+  </style>
+      <h1 >{{ article_title | safe }}</h1>
+      {{ data_export | safe }}
+	</div>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<style>
+.btn-primary {
+  color: #fff;
+  background-color: #906bae;
+  border-color: #694884;
+}
+
+.btn-primary:hover {
+  color: #fff;
+  background-color: #765194;
+  border-color: #5c3f73;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  background-color: #765194;
+  box-shadow: 0 0 0 0.2rem rgba(144, 107, 174, 0.5);
+}
+
+.btn-primary.disabled, .btn-primary:disabled {
+  color: #fff;
+  background-color: #906bae;
+  border-color: #4f3663;
+}
+
+.btn-primary:not(:disabled):not(.disabled):active, .btn-primary:not(:disabled):not(.disabled).active,
+.show > .btn-primary.dropdown-toggle {
+  color: #fff;
+  background-color: #4f3663;
+  border-color: #4f3663;
+}
+.btn-primary:not(:disabled):not(.disabled):active:focus, .btn-primary:not(:disabled):not(.disabled).active:focus,
+.show > .btn-primary.dropdown-toggle:focus {
+  background-color: #765194;
+  box-shadow: 0 0 0 0.2rem rgba(144, 107, 174, 0.5);
+}
+#reqTable td{
+  padding-right: 30px;
+  padding-top: 5px;
+}
+</style>
+<script>
+  window.onload = function() {
+    var reqTable = document.getElementById("reqTable");
+    var reqList = JSON.parse('{{ reqJSON | safe}}');
+    for (i = 0; i < reqList.length; i++) {
+      var row = reqTable.insertRow(i);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = reqList[i];
+      cell2.innerHTML = '<button class="btn btn-primary" onclick="deleteRow(this)" style="width: 75px">Remove</button>';
+    }
+    var row = reqTable.insertRow(reqList.length);
+    var cell1 = row.insertCell(0);
+    var cell2 = row.insertCell(1);
+    cell1.innerHTML = '<input id="newReq" type="text" style="width: 400px"></input>'
+    cell2.innerHTML = '<button class="btn btn-primary" style="width: 75px" onclick="addRow()">Add</button>';
+  }
+
+  function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById("reqTable").deleteRow(i);
+  }
+
+  function addRow() {
+    var reqTable = document.getElementById("reqTable");
+    var newReq = document.getElementById("newReq").value;
+    if (newReq.trim() != '') {
+      var rows = reqTable.getElementsByTagName("tr").length;
+      var row = reqTable.insertRow(rows-1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = newReq;
+      cell2.innerHTML = '<button class="btn btn-primary" onclick="deleteRow(this)" style="width: 75px">Remove</button>';
+    }
+  }
+
+  function addRequirements() {
+    var submitObj = [];
+    var reqTable = document.getElementById("reqTable");
+    for (i=0; i < reqTable.rows.length-1; i++) {
+      submitObj.push(reqTable.rows[i].cells[0].innerHTML);
+    }
+    var body = JSON.stringify(submitObj);
+    window.location = "add_requirement_w5/" + body;
+  }  
+</script>
+    <h2>{{ session['customer'] }} </h2>
+    <p><font size="3">Select customer and category > Select components > Select Business requirements > </font><font size="5"> Step 4. Select Technical requirements</font></p>
+    <a class="btn btn-primary btn-right" style="width: 200px" href="javascript:history.back()">< Back</a>
+    <table id="reqTable">
+    </table>
+    <p class="text-right"><button class="btn btn-primary btn-right" onclick="addRequirements()">Next &gt</button></p>
+{% endblock %}

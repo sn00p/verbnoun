@@ -1,0 +1,14 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  <div class="jumbotron text-center">
+    <h1>Xentaurs VerbNoun Portal</h1>
+    <p class="lead">VerbNoun Portal allows you to compare the modern technology tools of SDN, IaaS and DevOps by the Business, Technical and Governance requirements and optimally select them for projects of Xentaurs</p>
+    {% if session.logged_in != NULL %}
+    <a href="/dashboard" class="btn btn-violet btn-lg">Start VN Designer</a>
+    {% endif %}
+    {% if session.logged_in == NULL %}
+    <a href="/login" class="btn btn-violet btn-lg">Login</a>
+    {% endif %}
+  </div>
+{% endblock %}

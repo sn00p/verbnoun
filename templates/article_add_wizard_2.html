@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% include 'includes/_add_article_scripts.html' %}
+{% block body %}
+<h2>{{ session['customer'] }} </h2>
+<p><font size="3">Select customer ></font><font size="5"> Step 2. Select components</font></p>
+{% from "includes/_formhelpers.html" import render_field %}
+<a class="btn btn-violet btn-right" style="width: 200px" href="/article_add_wizard_1">< Back</a>
+<form method="POST" action="">
+  <div class="form-group">
+    {{ render_field(form.groups, class_="form-control", size="4", id="groups", onchange="add_article_wizard_2_groups()") }}
+  </div>
+  <div class="form-group">
+    {{ render_field(form.categories, class_="form-control", size="8", id="categories", onchange="add_article_wizard_2_categories()") }}
+  </div>
+  <div class="row">
+    <div class="col-xs-5">
+      <!-- Column 1 -->
+      {{ render_field(form.components, class_="form-control", size="20", id="components") }}
+    </div>
+    <div class="col-xs-2">
+      <div class="btn-group-vertical center-block" role="group" style="padding-top: 100%">
+        <button type="button" class="btn btn-transfer" onclick="add_article_wizard_2_add()">Add &#9654;</button>
+        <button type="button" class="btn btn-transfer" onclick="add_article_wizard_2_remove()">&#9664; Remove</button>
+      </div>
+    </div>
+    <div class="col-xs-5">
+      <!-- Column 3 -->
+      {{ render_field(form.components_selected, class_="form-control", size="20", id="components_selected") }}
+    </div>
+  </div>
+      <div style="margin-top: 20px; padding-bottom: 100px;">
+        <div style="float: left;"><a class="btn btn-violet btn-right" style="width: 200px" href="/article_add_wizard_1">< Back</a></div>
+        <div style="float: right;"><button class="btn btn-violet btn-right" style="width: 200px" type="button" onclick="submitComponents();false;" value="Next &gt">Next &gt</button></div>
+      </div>
+</form>
+<script>window.onload = add_article_wizard_2_onload();</script>
+{% endblock %}
