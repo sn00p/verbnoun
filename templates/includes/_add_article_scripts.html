@@ -1,4 +1,4 @@
-editWeights<script>
+<script>
 
   var components_dictionary = JSON.parse('{{ components_list | safe }}');
   var selectedComponents = [];
@@ -272,7 +272,6 @@ editWeights<script>
           url: $SCRIPT_ROOT + "/article_add_wizard_2",
           data: body,
           success: function(response) {
-              //console.log(response);
               window.location = "article_add_wizard_3";
             },
             error: function(response, error) {
@@ -289,7 +288,7 @@ editWeights<script>
     try {
       var vn = JSON.parse('{{ project_vn | safe }}');
     } catch (error) {
-
+      console.log(error)
     }
 
     var table = document.getElementById("verbnoun-table");
@@ -298,6 +297,17 @@ editWeights<script>
     var requirements = JSON.parse('{{ requirementsJSON | safe }}');
     var priorities = ['', 'Nice to have', 'Whish list', 'Based on Policy', 'Best Practice', 'Must have'];
     var weights = ['N/A', 'No', 'Partial', 'Yes'];
+
+    var components_sorted = [];
+    for (var i = 0; i < components.length; i++) {
+      for (var j = 1; j < components[i].length; j++) {
+        var obj = {
+          "g": components[i][0],
+          "c": components[i][j]
+        };
+        components_sorted.push(obj );
+      }
+    }
 
     // Row 1
     var row = table.insertRow();
@@ -447,7 +457,7 @@ editWeights<script>
     }
 
 
-    for (i = 2; i < table.rows.length; i++) {
+    /*for (i = 2; i < table.rows.length; i++) {
       for (j = 0; j < vn.length; j++) {
         if (table.rows[i].cells[1].innerHTML == vn[j].req) {
           table.rows[i].cells[2].children[0].value = Number.parseInt(vn[j].priority);
@@ -461,7 +471,52 @@ editWeights<script>
           }
         }
       }
+    }*/
+
+    for (i = 2; i < table.rows.length; i++) {
+      for (j = 0; j < vn.length; j++) {
+        if (table.rows[i].cells[1].innerHTML == vn[j].req) {
+          table.rows[i].cells[2].children[0].value = Number.parseInt(vn[j].priority);
+
+          for (k = 3; k < table.rows[i].cells.length; k++) {
+            for (l = 0; l < vn[j].weights.length; l++) {
+
+
+
+              /*if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c) {
+                table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+              }*/
+
+
+              //if (typeof vn[j].weights[l].g != "undefined") {
+              if (vn[j].weights[l].hasOwnProperty("g")) {
+                if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c && vn[j].weights[l].g == components_sorted[k-3].g) {
+                  table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+                }
+              } else {
+                if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c) {
+                  table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+                }
+              }
+
+              /*try {
+                if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c && vn[j].weights[l].g == components_sorted[k-3].g) {
+                  table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+                }
+              } catch(err) {
+                if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c) {
+                  table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+                }
+              }*/
+
+
+            }
+          }
+        }
+      }
     }
+
+ 
 
 
     tableRecalculate();
@@ -549,6 +604,17 @@ editWeights<script>
     var components = JSON.parse('{{ componentsJSON | safe }}');
     var requirements = JSON.parse('{{ requirementsJSON | safe }}');
 
+    var components_sorted = [];
+    for (var i = 0; i < components.length; i++) {
+      for (var j = 1; j < components[i].length; j++) {
+        var obj = {
+          "g": components[i][0],
+          "c": components[i][j]
+        };
+        components_sorted.push(obj );
+      }
+    }
+
     var cells = [];
 
     var c = 0;
@@ -590,7 +656,9 @@ editWeights<script>
       var weights = [];
       for (j = 3; j < table.rows[i].cells.length; j++) {
         var weight = {
-          "c": table.rows[1].cells[j].innerHTML,
+          //"c": table.rows[1].cells[j].innerHTML,
+          "c": components_sorted[j-3].c,
+          "g": components_sorted[j-3].g,
           "w": table.rows[i].cells[j].children[0].value
         }
         weights.push(weight);
