@@ -287,6 +287,8 @@
 
     try {
       var vn = JSON.parse('{{ project_vn | safe }}');
+  console.log("VN:");
+  console.log(vn);
     } catch (error) {
       console.log(error)
     }
@@ -308,6 +310,7 @@
         components_sorted.push(obj );
       }
     }
+console.log(components_sorted);
 
     // Row 1
     var row = table.insertRow();
@@ -475,7 +478,8 @@
 
     for (i = 2; i < table.rows.length; i++) {
       for (j = 0; j < vn.length; j++) {
-        if (table.rows[i].cells[1].innerHTML == vn[j].req) {
+        //if (table.rows[i].cells[1].innerHTML == vn[j].req) {
+  if (vn[j].hasOwnProperty("n") && table.rows[i].cells[0].innerHTML == vn[j].n || !vn[j].hasOwnProperty("n") && table.rows[i].cells[1].innerHTML == vn[j].req) {
           table.rows[i].cells[2].children[0].value = Number.parseInt(vn[j].priority);
 
           for (k = 3; k < table.rows[i].cells.length; k++) {
@@ -487,11 +491,15 @@
                 table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
               }*/
 
+    
+
 
               //if (typeof vn[j].weights[l].g != "undefined") {
               if (vn[j].weights[l].hasOwnProperty("g")) {
                 if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c && vn[j].weights[l].g == components_sorted[k-3].g) {
-                  table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+
+                    table.rows[i].cells[k].children[0].value = Number.parseInt(vn[j].weights[l].w);
+
                 }
               } else {
                 if (table.rows[1].cells[k].innerHTML == vn[j].weights[l].c) {
@@ -665,6 +673,7 @@
       }
       var req = {
         "req": table.rows[i].cells[1].innerHTML,
+  "n": table.rows[i].cells[0].innerHTML,
         "priority": table.rows[i].cells[2].children[0].value,
         "weights": weights
       };
