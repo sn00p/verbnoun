@@ -176,7 +176,6 @@
 
       for (j=3; j < cells[i].length; j++) {
         data = weights[Number.parseInt(cells[i][j])];
-        console.log()
         cell = row.insertCell();
         cell.innerHTML = data;
 
@@ -276,6 +275,7 @@
     //Product comp
     var productCompTable = document.getElementById("productCompTable");
     var productCompData = JSON.parse('{{ article.product_comp | safe }}');
+    console.log("productCompData:");
     console.log(productCompData);
 
     var headerOne = productCompTable.insertRow(0);
