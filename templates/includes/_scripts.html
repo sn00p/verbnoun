@@ -99,7 +99,7 @@
   }
 
   function load_article() {
-    document.getElementById("vntitle").innerHTML = "VerbNoun " + '{{ article.create_date }}';
+    document.getElementById("vntitle").innerHTML = "VerbNoun " + '{{ article.create_date }}' + '  ({{tz}})';
     var cells = JSON.parse('{{ article.body | safe }}');
     var table = document.getElementById("verbnoun-table");
     var minRow = 1;
@@ -275,20 +275,61 @@
     //Product comp
     var productCompTable = document.getElementById("productCompTable");
     var productCompData = JSON.parse('{{ article.product_comp | safe }}');
-    console.log("productCompData:");
     console.log(productCompData);
 
     var headerOne = productCompTable.insertRow(0);
-    headerOne.innerHTML = table.rows[0].innerHTML.replace('<th colspan="3"></th>', '<th rowspan="2"></th>');
-    /*var headerTwo = productCompTable.insertRow();
-    headerTwo = table.rows[1].innerHTML.replace('<th>R#</th><th>Requirement</th><th>Priority</th>', '');
-    console.log(table.rows[0].innerHTML);
-    console.log(table.rows[1].innerHTML);*/
-    var headerTwo = productCompTable.insertRow();
+    headerOne.innerHTML = table.rows[0].innerHTML.replace('<th colspan="3"></th>', '<th rowspan="2">Product Comparisons</th>');
+
+    var headerTwo = productCompTable.insertRow(1);
     headerTwo.style.fontWeight = "bold";
-    for (i = 3; i < table.rows[1].cells.length; i++) {
+    for (i = 0; i < productCompData.products.length; i++) {
       var htCell = headerTwo.insertCell();
-      htCell.innerHTML = table.rows[1].cells[i].innerHTML;
+      htCell.innerHTML = productCompData.products[i];
+    }
+
+
+    var buisnessProduct = productCompTable.insertRow(2);
+    var bCell = buisnessProduct.insertCell();
+    bCell.innerHTML = "Business Requirement Scorecard";
+    for (i = 0; i < productCompData.business.weights.length; i++) {
+      var btCell = buisnessProduct.insertCell();
+      btCell.innerHTML = productCompData.business.weights[i];
+      if (productCompData.business.max.includes(i)) {
+        btCell.setAttribute("class", "greenColumn");
+      }
+    }
+
+    var technicalProduct = productCompTable.insertRow(3);
+    var tCell = technicalProduct.insertCell();
+    tCell.innerHTML = "Technical Requirement Scorecard";
+    for (i = 0; i < productCompData.technical.weights.length; i++) {
+      var tCell = technicalProduct.insertCell();
+      tCell.innerHTML = productCompData.technical.weights[i];
+      if (productCompData.technical.max.includes(i)) {
+        tCell.setAttribute("class", "greenColumn");
+      }
+    }
+
+    var governanceProduct = productCompTable.insertRow(4);
+    var gCell = governanceProduct.insertCell();
+    gCell.innerHTML = "Governance Requirement Scorecard";
+    for (i = 0; i < productCompData.governance.weights.length; i++) {
+      var gCell = governanceProduct.insertCell();
+      gCell.innerHTML = productCompData.governance.weights[i];
+      if (productCompData.governance.max.includes(i)) {
+        gCell.setAttribute("class", "greenColumn");
+      }
+    }
+
+    var totalProduct = productCompTable.insertRow(5);
+    var totCell = totalProduct.insertCell();
+    totCell.innerHTML = "Total Score";
+    for (i = 0; i < productCompData.total.weights.length; i++) {
+      var totCell = totalProduct.insertCell();
+      totCell.innerHTML = productCompData.total.weights[i];
+      if (productCompData.total.max.includes(i)) {
+        totCell.setAttribute("class", "greenColumn");
+      }
     }
 
   }
