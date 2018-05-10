@@ -16,68 +16,85 @@ th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
-table.chosenProduct tr:first-child {
+#chosenProduct tr:first-child {
     text-align: center;
     background-color: rgb(242, 242, 242);
     font-family: Helvetica;
 }
 
-table.chosenProduct tr:nth-child(2) {  
+#chosenProduct tr:nth-child(2) {  
   font-weight: bold;
   background-color: rgb(242, 242, 242);
 }
 
-table.chosenProduct {
+#chosenProduct {
     border-collapse:collapse;
     font-family: Helvetica;
 }
 
-table.chosenProduct td, table.chosenProduct th {
+/*#chosenProduct td, table.chosenProduct th {
     border: 1px solid black;
-}
+}*/
 
 
-table.productComp tr:first-child {
+#productCompTable tr:first-child {
     text-align: center;
     background-color: rgb(242, 242, 242);
     font-family: Helvetica;
 }
-table.productComp {
+
+#productCompTable tr:nth-child(2) {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+#productCompTable{
     border-collapse:collapse;
     font-family: Helvetica;
     width: 100%;
 }
 
-table.productComp td, table.productComp th {
+/*#productComp td, table.productComp th {
     border: 1px solid black;
-}
+}*/
 
-table.productComp tr:nth-child(6) {
+#productCompTable tr:nth-child(6) {
     background-color: rgb(242, 242, 242);
     font-family: Helvetica;
     font-weight: bold;
 }
 
-  table.chosenProduct td {
+#chosenProduct td {
       padding: 10px;
       font-family: Helvetica;
     }
 
-  table.chosenProduct th {
+#chosenProduct th {
       padding: 10px;
       font-family: Helvetica;
     }
 
-  table.productComp td {
+#productComp td {
       padding: 10px;
       font-family: Helvetica;
     }
 
-    table.productComp td {
+#productComp td {
       padding: 10px;
       font-size: {{ font_size | safe }}pt;
       font-family: Helvetica;
     }
+
+#productComp th {
+      padding: 10px;
+      font-size: {{ font_size | safe }}pt;
+      font-family: Helvetica;
+    }
+
+  .greenColumn {
+    background-color: rgba(0, 255, 0, 0.3);
+  }
 </style>
 <script type="text/javascript">
   function openPDF(id) {
@@ -134,15 +151,19 @@ table.productComp tr:nth-child(6) {
   <div align="right">
     <form action="/export" method="post">
     <input type="hidden" name=id value={{ article.id }} >
+    {% if session['role'] != 'client' %}
     <a class="btn btn-violet btn-right" onclick="editWeights({{ article.id }})">&#x0270D; Edit Weights</a>
+    {% endif %}
     <a class="btn btn-violet btn-right" target="_blank" onclick="openPDF({{ article.id }})">&#10001; Open PDF</a>
     <button name="ExportBtn" type="submit" class="btn btn-violet" >&#x02913; Download PDF</button>
+    {% if session['role'] != 'client' %}
     <a class="btn btn-violet btn-right" onclick="sendToCustomer({{ article.id }})">&#9993; Send to Customer</a>
+    {% endif %}
     </form>
   </div>
   <hr>
 
-  <table border="1" class="chosenProduct" >
+  <table border="1" class="table table-bordered" id="chosenProduct">
         <th colspan=2>
           Chosen solutions
         </th>
@@ -162,7 +183,7 @@ table.productComp tr:nth-child(6) {
       <hr>
       <br/>
 
-      <table class="productComp" id="productCompTable">
+      <table class="table table-bordered" id="productCompTable">
       </table>
 
       <br/>

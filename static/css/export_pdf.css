@@ -1,40 +1,99 @@
+table.chosenProduct tr:first-child {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+table.chosenProduct tr:nth-child(2) {  
+  font-weight: bold;
+  background-color: rgb(242, 242, 242);
+}
+
+table.chosenProduct {
+    border-collapse:collapse;
+    font-family: Helvetica;
+}
+
+table.chosenProduct td, table.chosenProduct th {
+    border: 1px solid black;
+}
+
+
+table.productComp tr:first-child {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+table.productComp tr:nth-child(2){
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+table.productComp {
+    border-collapse:collapse;
+    font-family: Helvetica;
+    width: 100%;
+}
+
+table.productComp td, table.productComp th {
+    border: 1px solid black;
+}
+
+table.productComp tr:nth-child(6) {
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
+
+table.dataframe tr:first-child {
+    text-align: center;
+    background-color: rgb(242, 242, 242);
+    font-family: Helvetica;
+}
+
+table.dataframe {
+    border-collapse:collapse;
+    font-family: Helvetica;
+}
+
+table.dataframe td, table.dataframe th {
+    border: 1px solid black;
+}
+
+table.dataframe > tr:first-child > td:first-child {
+    font-weight: bold;
+}
+
+table.dataframe td:nth-child(1) {  
+  font-weight: bold;
+}
+
+table.dataframe td:nth-child(3) {  
+  font-weight: bold;
+}
+
+.header {
+    background-color: rgb(242, 242, 242);
+    text-align: center;
+    font-family: Helvetica;
+    font-weight: bold;
+}
+
 h1 {
     text-align: center;
     font-family: Helvetica;
     font-weight: bold;
 }
 
-table {
-    border-collapse:collapse;
-    font-family: Helvetica;
-    text-padding: 10px;
-    margin: 5px;
-}
-
-table td, table th {
-    border: 1px solid black;
-    padding: 10px;
-}
-
-table.chosenSolutions td:first-child { font-weight: bold; }
-
-table.Products th, table.chosenSolutions th{
-    background-color: rgb(242, 242, 242);
-}
-
-.chosen-header{
-    text-align: center;
-    font-weight: bold;
-}
-
-.col_heading {
+.total {
     background-color: rgb(242, 242, 242);
     text-align: center;
     font-family: Helvetica;
     font-weight: bold;
 }
-
-.pagebreak { page-break-before: always; }
 
 @page {
   size: Letter landscape;
@@ -60,5 +119,5 @@ table.Products th, table.chosenSolutions th{
         font-family: Helvetica;
         font-size: 7pt;
     }
-
+}
 }
