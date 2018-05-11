@@ -9,3 +9,4 @@ cairocffi
 weasyprint
 redis
 uwsgi
+tzlocal
