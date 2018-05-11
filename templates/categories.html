@@ -18,7 +18,7 @@
         categoryComponents.push(components[i].name)
       }
     }
-    var confirmMessage = "Do you really want to delete category \"" + categoryName + "\" and all its components?"
+    var confirmMessage = "Do you really want to delete component \"" + categoryName + "\" and all its products?"
     for (i = 0; i < categoryComponents.length; i++) {
       confirmMessage = confirmMessage + "\n-" + categoryComponents[i];
     }
@@ -40,10 +40,10 @@
     }
   }
 </script>
-    <h1>Categories of components</h1>
+    <h1>Components</h1>
     <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
     <hr>
-    <a class="btn btn-violet" href="/add_category">Add category</a>
+    <a class="btn btn-violet" href="/add_category">Add component</a>
     <hr>
     <table class="table table-striped">
       <tr>

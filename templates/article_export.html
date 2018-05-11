@@ -13,7 +13,9 @@
   	}
   	@page {
     @top-right {
-        content: "{{ customer | safe }} VerbNoun";
+        content: "{{ customer }}\AVerbNoun";
+        /*white-space: nowrap;*/
+        white-space: pre;
         font-family: Helvetica;
         font-size: 11pt;
         color: #808080;
@@ -24,12 +26,79 @@
         color: #808080;
     }
   }
-  table td, table th {
+  table.dataframe td {
+      padding: 10px;
       font-size: {{ font_size | safe }}pt;
+      font-family: Helvetica;
     }
+
+  table.chosenProduct td {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+  table.chosenProduct th {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+  table.productComp td {
+      padding: 10px;
+      font-family: Helvetica;
+    }
+
+    table.productComp td {
+      padding: 10px;
+      font-size: {{ font_size | safe }}pt;
+      font-family: Helvetica;
+    }
+
+  .greyColumn {
+    background-color: rgba(100, 100, 100, 0.3);
+  }
+  .greenColumn {
+    background-color: rgba(0, 255, 0, 0.3);
+  }
+  .redColumn {
+    background-color: rgba(255, 0, 0, 0.3);
+  }
+  .yellowColumn {
+    background-color: rgba(255, 255, 0, 0.3);
+  }
+  .pagebreak { page-break-before: always; }
   </style>
       <h1 >{{ article_title | safe }}</h1>
+
+      <table border="1" class="chosenProduct" >
+        <th colspan=2>
+          Chosen solutions
+        </th>
+        <tr>
+          <td><b>Component</b></td>
+          <td><b>Product</b></td>
+        </tr>
+        {% for cs in chosenSolutions %}
+        <tr>
+          <td>{{cs['group']}}</td>
+          <td>{{cs['product']}}</td>
+        </tr>
+        {% endfor%}
+      </table>
+
+      <br/>
+      <hr>
+      <br/>
+
+      {{ productCompTable | safe }}
+
+      <br/>
+      <hr>
+      <br/>
+      <div class="pagebreak"> </div>
+
       {{ data_export | safe }}
+
 	</div>
   </body>
 </html>
+

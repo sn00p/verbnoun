@@ -25,6 +25,7 @@
   window.onload = function() {
     var table = document.getElementById("componentsTable");
     for (i = 1; i < table.rows.length; i++) {
+      console.log(table.rows[i].cells[2].childNodes[0].getAttribute("href"));
       if (table.rows[i].cells[2].childNodes[0].getAttribute("href").indexOf("http") < 0) {
         table.rows[i].cells[2].childNodes[0].setAttribute("href", "http://" + table.rows[i].cells[2].childNodes[0].getAttribute("href"))
       }
@@ -32,14 +33,14 @@
   }
   
 </script>
-    <h1>Components</h1>
+    <h1>Products</h1>
     <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
     <hr>
     <a class="btn btn-violet" href="/add_component">Add component</a>
     <hr>
     <table class="table table-striped" id="componentsTable">
       <tr>
-        <th>Category</th>
+        <th>Component</th>
         <th>Name</th>
         <th>Link</th>
         <th></th>
