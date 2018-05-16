@@ -40,10 +40,10 @@ app.config['MAIL_USE_TLS'] = True
 mail = Mail(app)
 
 # Adjust printing attribute in pandas for troubleshooting
-pd.set_option('display.height', 1000)
-pd.set_option('display.max_rows', 500)
-pd.set_option('display.max_columns', 500)
-pd.set_option('display.width', 1000)
+#pd.set_option('display.height', 1000)
+#pd.set_option('display.max_rows', 500)
+#pd.set_option('display.max_columns', 500)
+#pd.set_option('display.width', 1000)
 
 app.config['LDAP_SERVER'] = os.environ.get('VERBNOUN_LDAP_SERVER')
 
