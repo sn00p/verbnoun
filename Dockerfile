@@ -19,6 +19,8 @@ RUN apt-get install -y nginx
 COPY ./nginx/app.conf /etc/nginx/sites-enabled/app.conf
 RUN rm /etc/nginx/sites-enabled/default
 
+ADD doc /doc
+
 # Install python-ldap as pip one is broken
 RUN apt-get install -y python3-ldap3
 
