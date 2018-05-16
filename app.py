@@ -233,10 +233,10 @@ def export_to_pdf():
     pd.set_option('max_colwidth', 400)
     df = pd.DataFrame(article_body)
     # Remove html tags
-    #df[0].replace({'<b>': ''}, regex=True, inplace=True)
-    #df[0].replace({'</b>': ''}, regex=True, inplace=True)
-    df[0].replace({'<b>': ''})
-    df[0].replace({'</b>': ''})
+    df[0].replace({'<b>': ''}, regex=True, inplace=True)
+    df[0].replace({'</b>': ''}, regex=True, inplace=True)
+    #df[0].replace({'<b>': ''})
+    #df[0].replace({'</b>': ''})
     # Convert object to int where it's possible
     ### Append subtotal row
     # firstly remove total row for grouping
@@ -409,10 +409,8 @@ def openPDF(id):
     pd.set_option('max_colwidth', 400)
     df = pd.DataFrame(article_body)
     # Remove html tags
-    #df[0].replace({'<b>': ''}, regex=True, inplace=True)
-    #df[0].replace({'</b>': ''}, regex=True, inplace=True)
-    df[0].replace({'<b>': ''})
-    df[0].replace({'</b>': ''})
+    df[0].replace({'<b>': ''}, regex=True, inplace=True)
+    df[0].replace({'</b>': ''}, regex=True, inplace=True)
     # Convert object to int where it's possible
     ### Append subtotal row
     # firstly remove total row for grouping
@@ -1412,10 +1410,8 @@ def sendVN():
     pd.set_option('max_colwidth', 400)
     df = pd.DataFrame(article_body)
     # Remove html tags
-    #df[0].replace({'<b>': ''}, regex=True, inplace=True)
-    #df[0].replace({'</b>': ''}, regex=True, inplace=True)
-    df[0].replace({'<b>': ''})
-    df[0].replace({'</b>': ''})
+    df[0].replace({'<b>': ''}, regex=True, inplace=True)
+    df[0].replace({'</b>': ''}, regex=True, inplace=True)
     # Convert object to int where it's possible
     ### Append subtotal row
     # firstly remove total row for grouping

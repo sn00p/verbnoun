@@ -4,7 +4,7 @@ Flask-WTF
 passlib
 flask_jsglue
 Flask-Mail
-pandas
+pandas==0.22.0
 cairocffi
 weasyprint
 redis
