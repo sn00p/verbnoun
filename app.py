@@ -984,33 +984,33 @@ def add_customer():
 
     return render_template('add_customer.html', form = form)
 
-@app.route('/edit_customer/<string:id>', methods=['GET', 'POST'])
-@is_logged_in
-def edit_customer(id):
-    cur = mysql.connection.cursor()
-    result = cur.execute("SELECT * FROM customers WHERE id = %s", [id])
-    article = cur.fetchone()
-    cur.close()
-    form = CustomerForm(request.form)
-    form.name.data = article['name']
-    form.comments.data = article['comments']
+#@app.route('/edit_customer/<string:id>', methods=['GET', 'POST'])
+#@is_logged_in
+#def edit_customer(id):
+    #cur = mysql.connection.cursor()
+    #result = cur.execute("SELECT * FROM customers WHERE id = %s", [id])
+    #article = cur.fetchone()
+    #cur.close()
+    #form = CustomerForm(request.form)
+    #form.name.data = article['name']
+    #form.comments.data = article['comments']
 
-    if request.method == 'POST' and form.validate():
-        name = request.form['name']
-        comments = request.form['comments']
-        cur = mysql.connection.cursor()
-        cur.execute("SELECT name FROM customers WHERE id=" + str(id))
-        customer = cur.fetchone()
-        cur.execute("UPDATE customers SET name=%s, comments=%s WHERE id=%s",(name, comments, id))
-        cur.execute("UPDATE articles SET customer='" + str(name) + "' WHERE customer='"+ customer['name']+ "'")
-        cur.execute("UPDATE projects SET customer_name='" + str(name) +"' WHERE customer_name='"+ customer['name'] + "'")
-        mysql.connection.commit()
-        cur.close()
+    #if request.method == 'POST' and form.validate():
+        #name = request.form['name']
+        #comments = request.form['comments']
+        #cur = mysql.connection.cursor()
+        #cur.execute("SELECT name FROM customers WHERE id=" + str(id))
+        #customer = cur.fetchone()
+        #cur.execute("UPDATE customers SET name=%s, comments=%s WHERE id=%s",(name, comments, id))
+        #cur.execute("UPDATE articles SET customer='" + str(name) + "' WHERE customer='"+ customer['name']+ "'")
+        #cur.execute("UPDATE projects SET customer_name='" + str(name) +"' WHERE customer_name='"+ customer['name'] + "'")
+        #mysql.connection.commit()
+        #cur.close()
 
-        flash('Customer was updated', 'success')
-        return redirect(url_for('customers'))
+        #flash('Customer was updated', 'success')
+        #return redirect(url_for('customers'))
 
-    return render_template('edit_customer.html', form=form)
+    #return render_template('edit_customer.html', form=form)
 
 @app.route('/delete_customer/<int:id>', methods=['GET', 'POST'])
 @is_logged_in
@@ -1646,6 +1646,139 @@ def append_total_html(ds):
         sub_html += '<td>' + str(sub_row) + '</td>\n'
     sub_html += '</tr>\n</tbody>\n</table>'
     return sub_html
+
+@app.route('/customer_sector', methods = ['GET', 'POST'])
+@is_logged_in
+def customer_sector():
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM customer_sector")
+    sectors = cur.fetchall()
+    cur.close()
+    sectorsJSON = json.JSONEncoder().encode(sectors)
+
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor()
+        newsectors = json.JSONDecoder().decode(request.data.decode('utf-8'))
+        for sector in newsectors:
+            cursor.execute("INSERT INTO customer_sector(name) VALUES ('" + sector + "')")
+        mysql.connection.commit()
+        cursor.close()
+
+    if result > 0:
+        return render_template('customer_sector.html', sectors = sectors, sectorsJSON = sectorsJSON)
+    else:
+        msg = 'No groups found.'
+        return render_template('customer_sector.html', msg = msg)
+
+@app.route('/delete_sector/<int:id>', methods=['GET'])
+@is_logged_in
+def delete_sector(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM customer_sector WHERE id=" + str(id))
+    mysql.connection.commit()
+    cursor.close()
+    return json.dumps({}), 200, {'ContentType':'application/json'}
+
+@app.route('/public_clouds', methods = ['GET', 'POST'])
+@is_logged_in
+def public_clouds():
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM public_clouds")
+    clouds = cur.fetchall()
+    cur.close()
+    cloudsJSON = json.JSONEncoder().encode(clouds)
+
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor()
+        newclouds = json.JSONDecoder().decode(request.data.decode('utf-8'))
+        for cloud in newclouds:
+            cursor.execute("INSERT INTO public_clouds(name) VALUES ('" + cloud + "')")
+        mysql.connection.commit()
+        cursor.close()
+
+    if result > 0:
+        return render_template('public_clouds.html', clouds = clouds, cloudsJSON = cloudsJSON)
+    else:
+        msg = 'No groups found.'
+        return render_template('public_clouds.html', msg = msg)
+
+@app.route('/delete_cloud/<int:id>', methods=['GET'])
+@is_logged_in
+def delete_cloud(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM public_clouds WHERE id=" + str(id))
+    mysql.connection.commit()
+    cursor.close()
+    return json.dumps({}), 200, {'ContentType':'application/json'}
+
+@app.route('/project_types', methods = ['GET', 'POST'])
+@is_logged_in
+def project_types():
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM project_types")
+    types = cur.fetchall()
+    cur.close()
+    typesJSON = json.JSONEncoder().encode(types)
+
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor()
+        newprojects = json.JSONDecoder().decode(request.data.decode('utf-8'))
+        for project in newprojects:
+            cursor.execute("INSERT INTO project_types(name) VALUES ('" + project + "')")
+        mysql.connection.commit()
+        cursor.close()
+
+    if result > 0:
+        return render_template('project_types.html', types = types, typesJSON = typesJSON)
+    else:
+        msg = 'No groups found.'
+        return render_template('project_types.html', msg = msg)
+
+@app.route('/delete_project_type/<int:id>', methods=['GET'])
+@is_logged_in
+def delete_project_type(id):
+    cursor = mysql.connection.cursor()
+    cursor.execute("DELETE FROM project_types WHERE id=" + str(id))
+    mysql.connection.commit()
+    cursor.close()
+    return json.dumps({}), 200, {'ContentType':'application/json'}
+
+@app.route('/edit_customer/<string:id>', methods=['GET', 'POST'])
+@is_logged_in
+def edit_customer(id):
+    cur = mysql.connection.cursor()
+    result = cur.execute("SELECT * FROM customers WHERE id =" + str(id))
+    customer = cur.fetchone()
+    result = cur.execute("SELECT * FROM customer_sector")
+    sectors = cur.fetchall()
+    result = cur.execute("SELECT * FROM project_types")
+    types = cur.fetchall()
+    result = cur.execute("SELECT * FROM public_clouds")
+    clouds = cur.fetchall()
+    cur.close()
+    customerJSON = json.JSONEncoder().encode(customer)
+    sectorsJSON = json.JSONEncoder().encode(sectors)
+    typesJSON = json.JSONEncoder().encode(types)
+    cloudsJSON = json.JSONEncoder().encode(clouds)
+
+    customer_clouds = json.JSONEncoder().encode(json.loads(customer['public_clouds']))
+    customer_sector = customer['sector']
+    customer_type = customer['project_type']
+    print(customer_clouds)
+
+    if request.method == 'POST':
+        cursor = mysql.connection.cursor()
+        customer = json.JSONDecoder().decode(request.data.decode('utf-8'))
+        print(json.dumps(customer['clouds']));
+        cursor.execute('UPDATE customers SET name="' + customer['name'] + '", comments="' + customer['comment'] + '", sector="' + customer['sector'] + '", project_type ="' + customer['type'] + '", emp_number=' + customer['empNumber'] + ', valuation='+ customer['valuation'] +', spend_it=' + customer['spend'] + ', deploy_speed=' + customer['speed'] + ', public_clouds=\'' + str(customer['clouds']) + '\' WHERE id=' + str(id))
+        mysql.connection.commit()
+        cursor.close()
+
+    if result > 0:
+        return render_template('edit_customer.html', customer = customer, sectors = sectors, types = types, clouds = clouds, customerJSON = customerJSON, sectorsJSON = sectorsJSON, typesJSON = typesJSON, cloudsJSON = cloudsJSON, customer_clouds = customer_clouds, customer_sector = customer_sector, customer_type = customer_type)
+    else:
+        msg = 'No groups found.'
+        return render_template('edit_customer.html', msg = msg)
 
 #if __name__ == '__main__':
 #app.secret_key='secret123'

@@ -1,0 +1,162 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  var edited = false;
+
+  window.onload = function() {
+    var table = document.getElementById("typesTable");
+    document.getElementById("saveButton").style.visibility = "hidden";
+  }
+
+  function addType() {
+    var table = document.getElementById("typesTable");
+    var newType = document.getElementById("newType").value;
+    if (newType.trim() != '') {
+      var rows = table.rows.length;
+      var row = table.insertRow(rows-1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = newType;
+      cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteRow(this)" style="width: 50px">X</button>';
+    }
+    document.getElementById("newType").value = "";
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function checkList() {
+    var list = [];
+    var table = document.getElementById("typesTable");
+    var types = null;
+    try {
+      types = JSON.parse('{{ typesJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < types.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == types[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    if (list.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function saveTypes() {
+    var list = [];
+    var table = document.getElementById("typesTable");
+    var types = null;
+    try {
+      types = JSON.parse('{{ typesJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < types.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == types[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    
+    var body = JSON.stringify(list);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/project_types",
+          data: body,
+          success: function(response) {
+              window.location = "project_types";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    return false;
+  }
+
+  function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById("typesTable").deleteRow(i);
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function deleteType(id) {
+    var types = JSON.parse('{{ typesJSON | safe }}');
+    var typeName = "";
+    for (i = 0; i < types.length; i++) {
+      if (types[i].id == id) {
+        typeName = types[i].name;
+        break;
+      }
+    }
+    var confirmMessage = "Do you really want to delete project type \"" + typeName + "\"?"
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_project_type/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/project_types";
+        },
+          error: function(response, error) {
+            console.log(response);
+              alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }
+</script>
+    <h1>Project types</h1>
+    <hr>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <table class="table table-striped" id="typesTable">
+      <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for type in types %}
+      <tr>
+        <td>{{ type.name }}</td>
+        <td><button class="btn btn-danger" onclick="deleteType({{ type.id }})">Delete</button></td>
+      </tr>
+      {% endfor %}
+      <tr id="addRow">
+        <td><input class="form-control" id="newType" type="text" style="width: 400px"></input></td>
+        <td><button class="btn btn-add" onclick="addType()">Add</button></td>
+        <td></td>
+      </tr>
+    </table>
+    <div id="saveDiv" style="width: 90%; padding-bottom: 50px">
+    <button id="saveButton" class="btn btn-violet pull-right" onclick="saveTypes()">Save</button>
+    <hr>
+    </div>
+{% endblock %}

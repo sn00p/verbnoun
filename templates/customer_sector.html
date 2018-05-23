@@ -1,0 +1,162 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<script>
+  var edited = false;
+
+  window.onload = function() {
+    var table = document.getElementById("sectorsTable");
+    document.getElementById("saveButton").style.visibility = "hidden";
+  }
+
+  function addSector() {
+    var table = document.getElementById("sectorsTable");
+    var newSector = document.getElementById("newSector").value;
+    if (newSector.trim() != '') {
+      var rows = table.rows.length;
+      var row = table.insertRow(rows-1);
+      var cell1 = row.insertCell(0);
+      var cell2 = row.insertCell(1);
+      cell1.innerHTML = newSector;
+      cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteRow(this)" style="width: 50px">X</button>';
+    }
+    document.getElementById("newSector").value = "";
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function checkList() {
+    var list = [];
+    var table = document.getElementById("sectorsTable");
+    var sectors = null;
+    try {
+      sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < sectors.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == sectors[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    if (list.length > 0) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function saveSectors() {
+    var list = [];
+    var table = document.getElementById("sectorsTable");
+    var sectors = null;
+    try {
+      sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    } catch (err) {} 
+    for (i = 1; i < table.rows.length-1; i++) {
+      var flag = false;
+      for (j = 0; j < sectors.length; j++) {
+        if (table.rows[i].cells[0].innerHTML == sectors[j].name) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        list.push(table.rows[i].cells[0].innerHTML);
+      }
+    }
+
+    
+    var body = JSON.stringify(list);
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/customer_sector",
+          data: body,
+          success: function(response) {
+              window.location = "customer_sector";
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+              }
+          });
+    return false;
+  }
+
+  function deleteRow(r) {
+    var i = r.parentNode.parentNode.rowIndex;
+    document.getElementById("sectorsTable").deleteRow(i);
+
+    if (checkList()) {
+      document.getElementById("saveButton").style.visibility = "visible";
+    } else {
+      document.getElementById("saveButton").style.visibility = "hidden";
+    }
+  }
+
+  function deleteSector(id) {
+    var sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    var sectorName = "";
+    for (i = 0; i < sectors.length; i++) {
+      if (sectors[i].id == id) {
+        sectorName = sectors[i].name;
+        break;
+      }
+    }
+    var confirmMessage = "Do you really want to delete customer sector \"" + sectorName + "\"?"
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_sector/" + id,
+        data: body,
+        success: function(response) {
+          window.location.href = "/customer_sector";
+        },
+          error: function(response, error) {
+            console.log(response);
+              alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }
+</script>
+    <h1>Customer sector</h1>
+    <hr>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+    <hr>
+    <table class="table table-striped" id="sectorsTable">
+      <tr>
+        <th>Name</th>
+        <th></th>
+        <th></th>
+      </tr>
+      {% for sector in sectors %}
+      <tr>
+        <td>{{ sector.name }}</td>
+        <td><button class="btn btn-danger" onclick="deleteSector({{ sector.id }})">Delete</button></td>
+      </tr>
+      {% endfor %}
+      <tr id="addRow">
+        <td><input class="form-control" id="newSector" type="text" style="width: 400px"></input></td>
+        <td><button class="btn btn-add" onclick="addSector()">Add</button></td>
+        <td></td>
+      </tr>
+    </table>
+    <div id="saveDiv" style="width: 90%; padding-bottom: 50px">
+    <button id="saveButton" class="btn btn-violet pull-right" onclick="saveSectors()">Save</button>
+    <hr>
+    </div>
+{% endblock %}

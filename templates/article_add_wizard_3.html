@@ -2,6 +2,42 @@
 
 {% block body %}
 <script>
+
+	$(document).on("focus keyup", "input.autocomplete", function() {
+    // Cache useful selectors
+    var $input = $(this);
+    var $dropdown = $input.next("ul.dropdown-menu");
+    
+    // Create the no matches entry if it does not exists yet
+    if (!$dropdown.data("containsNoMatchesEntry")) {
+        $("input.autocomplete + ul.dropdown-menu").append('<li class="no-matches hidden"><a>No matches</a></li>');
+        $dropdown.data("containsNoMatchesEntry", true);
+    }
+    
+    // Show only matching values
+    $dropdown.find("li:not(.no-matches)").each(function(key, li) {
+        var $li = $(li);
+        $li[new RegExp($input.val(), "i").exec($li.text()) ? "removeClass" : "addClass"]("hidden");
+    });
+    
+    // Show a specific entry if we have no matches
+    $dropdown.find("li.no-matches")[$dropdown.find("li:not(.no-matches):not(.hidden)").length > 0 ? "addClass" : "removeClass"]("hidden");
+});
+
+$(document).on("click", "input.autocomplete + ul.dropdown-menu li", function(e) {
+    // Prevent any action on the window location
+    e.preventDefault();
+    
+    // Cache useful selectors
+    $li = $(this);
+    $input = $li.parent("ul").prev("input");
+    
+    // Update input text with selected entry
+    if (!$li.is(".no-matches")) {
+        $input.val($li.text());
+    }
+});
+
   function fillBySaved(arr) {
     for (i = 1; i < arr.length; i++) {
         var row = reqTable.insertRow(i-1);
@@ -14,13 +50,29 @@
       row.setAttribute("id", "addRow");
       var cell1 = row.insertCell(0);
       var cell2 = row.insertCell(1);
-      cell1.innerHTML = '<input id="newReq" type="text" style="width: 400px"></input>'
+
+      var reqList = null;
+      var dropdown_reqs = "";
+      try {
+      	reqList = JSON.parse('{{ reqJSON | safe}}');
+      	for (var i = 0; i < reqList.length; i++) {
+      		dropdown_reqs += "<li><a>" + reqList[i] + "</a></li>";
+      	}
+      } catch (err) {}
+     cell1.innerHTML = `<form class="form-horizontal" role="form">
+		<div class="form-group">
+			<div class="col-sm-9">
+	            <input type="text" class="autocomplete form-control" id="newReq" data-toggle="dropdown" />
+	            <ul class="dropdown-menu" role="menu">` + dropdown_reqs + `</ul>
+			</div>
+		</div>`
       cell2.innerHTML = '<button class="btn btn-violet" style="width: 75px" onclick="addRow()">Add</button>';
   }
 
   window.onload = function() {
     var reqTable = document.getElementById("reqTable");
     var breqs = null;
+    var dropdown_reqs = "";
     try {
       breqs = JSON.parse('{{ project_breqs | safe }}');
     } catch (err) {}
@@ -29,6 +81,9 @@
       fillBySaved(breqs);
     } else {
       var reqList = JSON.parse('{{ reqJSON | safe}}');
+      for (var i = 0; i < reqList.length; i++) {
+      	dropdown_reqs += "<li><a>" + reqList[i] + "</a></li>";
+      }
       for (i = 0; i < reqList.length; i++) {
         var row = reqTable.insertRow(i);
         var cell1 = row.insertCell(0);
@@ -40,7 +95,13 @@
       row.setAttribute("id", "addRow");
       var cell1 = row.insertCell(0);
       var cell2 = row.insertCell(1);
-      cell1.innerHTML = '<input id="newReq" type="text" style="width: 400px"></input>'
+      cell1.innerHTML = `<form class="form-horizontal" role="form">
+		<div class="form-group">
+			<div class="col-sm-9">
+	            <input type="text" class="autocomplete form-control" id="newReq" data-toggle="dropdown" />
+	            <ul class="dropdown-menu" role="menu">` + dropdown_reqs + `</ul>
+			</div>
+		</div>`
       cell2.innerHTML = '<button class="btn btn-violet" style="width: 75px" onclick="addRow()">Add</button>';
       }
   }

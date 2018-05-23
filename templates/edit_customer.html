@@ -1,15 +1,191 @@
 {% extends 'layout.html' %}
 
 {% block body %}
+<script type="application/javascript">
+  window.onload = function() {
+    //var customer = JSON.parse('{{ customerJSON | safe }}');
+    var sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    var types = JSON.parse('{{ typesJSON | safe }}');
+    var clouds = JSON.parse('{{ cloudsJSON | safe }}');
+    var customer_clouds = JSON.parse('{{ customer_clouds | safe }}');
+
+    var comment = document.getElementById("commentArea").value;
+    var empNumber = document.getElementById("empNumberField").value;
+    var valuation = document.getElementById("valuationField").value;
+    var spend = document.getElementById("spendField").value;
+    var speed = document.getElementById("speedField").value;
+
+    var customer_sector = "{{customer_sector}}";
+    var customer_type = "{{customer_type}}";
+    document.getElementById("sectorField").value = customer_sector;
+    document.getElementById("typeField").value = customer_sector;
+
+    if (comment === "None") {
+      document.getElementById("commentArea").value = "";
+    }
+    if (empNumber === "None") {
+      document.getElementById("empNumberField").value = "";
+    }
+    if (valuation === "None") {
+      document.getElementById("valuationField").value = "";
+    }
+    if (spend === "None") {
+      document.getElementById("spendField").value = "";
+    }
+    if (speed === "None") {
+      document.getElementById("speedField").value = "";
+    }
+
+    for (var i = 0; i < customer_clouds.length; i++) {
+      //if (document.getElementById("cloud_" + customer_clouds[i]) != null) {
+      if (document.getElementById("cloud_" + customer_clouds[i]) != null) {
+        document.getElementById("cloud_" + customer_clouds[i]).checked = true;
+      }
+    }
+  }
+
+  function save() {
+    var name = document.getElementById("nameField").value;
+    var sector = document.getElementById("sectorField").value;
+    var type = document.getElementById("typeField").value;
+    var empNumber = document.getElementById("empNumberField").value.trim();
+    var valuation = document.getElementById("valuationField").value.trim();
+    var spend = document.getElementById("spendField").value.trim();
+    var speed = document.getElementById("speedField").value.trim();
+    var comment = document.getElementById("commentArea").value;
+    var clouds = [];
+
+    var cloudsJSON = JSON.parse('{{ cloudsJSON | safe }}');
+    for (var i = 0; i < cloudsJSON.length; i++) {
+      if (document.getElementById("cloud_" + cloudsJSON[i].name).checked) {
+        clouds.push(document.getElementById("cloud_" + cloudsJSON[i].name).value);
+      }
+    }
+
+    if (!isNumber(empNumber)) {
+        alert("# of employees is not a number!");
+    } else if (!isNumber(valuation)) {
+        alert("Company’s Valuation is not a number!");
+    } else if (!isNumber(spend)) {
+        alert("Company’s spend on IT is not a number!");
+    } else if (!isNumber(speed)) {
+        alert("Target speed of deploying is not a number!");
+    } else {
+      if (empNumber == "") {
+        empNumber = "NULL";
+      }
+      if (valuation == "") {
+        valuation = "NULL";
+      }
+      if (spend == "") {
+        spend = "NULL";
+      }
+      if (speed == "") {
+        speed = "NULL";
+      }
+
+      var obj = {
+        "name": name,
+        "sector": sector,
+        "type": type,
+        "empNumber": empNumber,
+        "valuation": valuation,
+        "spend": spend,
+        "speed": speed,
+        "comment": comment,
+        "clouds": JSON.stringify(clouds)
+      };
+
+      console.log(obj);
+
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        type: "POST",
+          headers: {"Content-Type": "application/json"},
+            url: $SCRIPT_ROOT + "/edit_customer/{{ customer.id }}",
+            data: body,
+            success: function(response) {
+                window.location = "/customers";
+              },
+              error: function(response, error) {
+                  console.log(response);
+                  console.log(error);
+                }
+            });
+    }
+
+  }
+
+
+
+  function isNumber(n) {
+    return (!isNaN(parseFloat(n)) && isFinite(n)) || n =="";
+  }
+
+</script>
+
   <h1>Edit Customer</h1>
-  {% from "includes/_formhelpers.html" import render_field %}
-  <form method="POST" action="">
-    <div class="form-group">
-      {{ render_field(form.name, class_="form-control") }}
+  <hr>
+    <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
+  <hr>
+  <div class="input-group" style="margin-top: 20px;">
+    <span class="input-group-addon" style="width: 200px">Name</span>
+    <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" value="{{ customer.name }}" style="width: 300px">
+  </div>
+  <div class="input-group" style="margin-top: 20px;">
+        <span class="input-group-addon" style="width: 200px">Customer sector</span>
+        <select id="sectorField" class="form-control" style="width: 300px">
+          <option value=""></option>
+          {% for sector in sectors: %}
+          <option value="{{sector.name}}">{{sector.name}}</option>
+          {% endfor %}
+    </select>
+  </div>
+  <div class="input-group" style="margin-top: 20px;">
+        <span class="input-group-addon" style="width: 200px">Type of project</span>
+        <select id="typeField" class="form-control" style="width: 300px">
+          <option value=""></option>
+          {% for type in types: %}
+          <option value="{{type.name}}">{{type.name}}</option>
+          {% endfor %}
+    </select>
+  </div>
+  <div class="input-group" style="margin-top: 20px;">
+    <span class="input-group-addon" style="width: 200px"># of employees</span>
+    <input id="empNumberField" type="text" min=0 class="form-control" value="{{ customer.emp_number }}" aria-describedby="basic-addon1" style="width: 300px">
+  </div>
+  <div class="input-group" style="margin-top: 20px;">
+    <span class="input-group-addon" style="width: 200px">Company’s Valuation (M$)</span>
+    <input id="valuationField" type="text" min=0 class="form-control" value="{{ customer.valuation }}" aria-describedby="basic-addon1" style="width: 300px">
+  </div>
+  <div class="input-group" style="margin-top: 20px;">
+    <span class="input-group-addon" style="width: 200px">Company’s spend on IT (M$)</span>
+    <input id="spendField" type="text" min=0 class="form-control" value="{{ customer.spend_it }}" aria-describedby="basic-addon1" style="width: 300px">
+  </div>
+  <div style="margin-top: 20px;" id="cloudField">
+    <label>Public clouds are expected to be used:</label>
+    {% for cloud in clouds: %}
+    <div class="form-check" id="cloudField_{{ cloud.name }}" style="margin-top: 10px;">
+      <input class="form-check-input" type="checkbox" value="{{ cloud.name }}" id="cloud_{{ cloud.name }}">
+      <label class="form-check-label" for="cloud" style="font-weight: normal;">
+        {{ cloud.name }}
+      </label>
     </div>
-    <div class="form-group">
-      {{ render_field(form.comments, class_="form-control") }}
-    </div>
-    <p><input class="btn btn-violet" type="submit" value="Save">
-  </form>
+    {% endfor %}
+  </div>
+  <label style="margin-top: 20px;">Target speed of deploying infrastructure on demand (during project operation) (min):</label>
+  <div class="input-group" style="margin-top: 10px;">
+    <input id="speedField" type="text" min=0 class="form-control" value="{{ customer.deploy_speed}}" aria-describedby="basic-addon1" style="width: 500px">
+  </div>
+  <hr>
+  <div class="form-group">
+    <label for="commentArea">Comments</label>
+    <textarea class="form-control" id="commentArea" rows="3" style="width: 500px">{{ customer.comments }}</textarea>
+  </div>
+
+  <div id="saveDiv" style="width: 90%; padding-bottom: 50px; padding-top: 30px">
+    <button id="saveButton" class="btn btn-violet" style="margin-left: 450px" onclick="save()">Save</button>
+  </div>
+
 {% endblock %}
