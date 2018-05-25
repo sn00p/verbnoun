@@ -115,9 +115,9 @@ def login():
                 else:
                     error = 'Invalid login'
                     return render_template('login.html', error = error)
-                except:
-                    error = 'Username not found'
-                    return render_template('login.html', error = error)
+            except:
+                error = 'Username not found'
+                return render_template('login.html', error = error)
         else:
             error = 'Username not found'
             return render_template('login.html', error = error)
