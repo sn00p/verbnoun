@@ -195,6 +195,9 @@
     var types = JSON.parse('{{ typesJSON | safe }}');
     var used_types = JSON.parse('{{ usedTypesJSON | safe }}');
 
+    console.log(types);
+    console.log(used_types);
+
     var type_customers = [];
 
     for (var i = 0; i < used_types.length; i++) {
@@ -258,7 +261,7 @@
       {% for type in types %}
       <tr>
         <td>{{ type.name }}</td>
-        <td><button class="btn btn-danger" onclick="deleteType({{ type.id }} ',{{ type.name }}')" style="width: 100px">Delete</button></td>
+        <td><button class="btn btn-danger" onclick="deleteType({{ type.id }}, '{{ type.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">

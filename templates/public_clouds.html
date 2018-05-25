@@ -273,7 +273,7 @@
       {% for cloud in clouds %}
       <tr>
         <td>{{ cloud.name }}</td>
-        <td><button class="btn btn-danger" onclick="deleteCloud({{ cloud.id }} ',{{ cloud.name }}')" style="width: 100px">Delete</button></td>
+        <td><button class="btn btn-danger" onclick="deleteCloud({{ cloud.id }}, '{{ cloud.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">
