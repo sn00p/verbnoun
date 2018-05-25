@@ -130,11 +130,11 @@
     <a class="btn btn-violet btn-right" style="width: 200px" href="/customers">< Back</a>
   <hr>
   <div class="input-group" style="margin-top: 20px;">
-    <span class="input-group-addon" style="width: 200px">Name</span>
+    <span class="input-group-addon" style="width: 210px">Name</span>
     <input id="nameField" type="text" class="form-control" aria-describedby="basic-addon1" value="{{ customer.name }}" style="width: 300px">
   </div>
   <div class="input-group" style="margin-top: 20px;">
-        <span class="input-group-addon" style="width: 200px">Customer sector</span>
+        <span class="input-group-addon" style="width: 210px">Customer sector</span>
         <select id="sectorField" class="form-control" style="width: 300px">
           <option value=""></option>
           {% for sector in sectors: %}
@@ -143,7 +143,7 @@
     </select>
   </div>
   <div class="input-group" style="margin-top: 20px;">
-        <span class="input-group-addon" style="width: 200px">Type of project</span>
+        <span class="input-group-addon" style="width: 210px">Type of project</span>
         <select id="typeField" class="form-control" style="width: 300px">
           <option value=""></option>
           {% for type in types: %}
@@ -152,15 +152,15 @@
     </select>
   </div>
   <div class="input-group" style="margin-top: 20px;">
-    <span class="input-group-addon" style="width: 200px"># of employees</span>
+    <span class="input-group-addon" style="width: 210px"># of employees</span>
     <input id="empNumberField" type="text" min=0 class="form-control" value="{{ customer.emp_number }}" aria-describedby="basic-addon1" style="width: 300px">
   </div>
   <div class="input-group" style="margin-top: 20px;">
-    <span class="input-group-addon" style="width: 200px">Company’s Valuation (M$)</span>
+    <span class="input-group-addon" style="width: 210px">Company’s Valuation (M$)</span>
     <input id="valuationField" type="text" min=0 class="form-control" value="{{ customer.valuation }}" aria-describedby="basic-addon1" style="width: 300px">
   </div>
   <div class="input-group" style="margin-top: 20px;">
-    <span class="input-group-addon" style="width: 200px">Company’s spend on IT (M$)</span>
+    <span class="input-group-addon" style="width: 210px">Company’s spend on IT (M$)</span>
     <input id="spendField" type="text" min=0 class="form-control" value="{{ customer.spend_it }}" aria-describedby="basic-addon1" style="width: 300px">
   </div>
   <div style="margin-top: 20px;" id="cloudField">
@@ -176,12 +176,12 @@
   </div>
   <label style="margin-top: 20px;">Target speed of deploying infrastructure on demand (during project operation) (min):</label>
   <div class="input-group" style="margin-top: 10px;">
-    <input id="speedField" type="text" min=0 class="form-control" value="{{ customer.deploy_speed}}" aria-describedby="basic-addon1" style="width: 500px">
+    <input id="speedField" type="text" min=0 class="form-control" value="{{ customer.deploy_speed}}" aria-describedby="basic-addon1" style="width: 510px">
   </div>
   <hr>
   <div class="form-group">
     <label for="commentArea">Comments</label>
-    <textarea class="form-control" id="commentArea" rows="3" style="width: 500px">{{ customer.comments }}</textarea>
+    <textarea class="form-control" id="commentArea" rows="3" style="width: 510px">{{ customer.comments }}</textarea>
   </div>
 
   <div id="saveDiv" style="width: 90%; padding-bottom: 50px; padding-top: 30px">

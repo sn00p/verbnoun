@@ -9,7 +9,7 @@
     document.getElementById("saveButton").style.visibility = "hidden";
   }
 
-  function addSector() {
+  /*function addSector() {
     var table = document.getElementById("sectorsTable");
     var newSector = document.getElementById("newSector").value;
     if (newSector.trim() != '') {
@@ -27,6 +27,46 @@
     } else {
       document.getElementById("saveButton").style.visibility = "hidden";
     }
+  }*/
+
+  function addSector() {
+    var table = document.getElementById("sectorsTable");
+    var newSector = document.getElementById("newSector").value;
+
+    var submitObject = {"name": newSector};
+    var body = JSON.stringify(submitObject);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/add_sector",
+          data: body,
+          success: function(response) {
+              var sectorList = JSON.parse(response);
+
+              var table = document.getElementById("sectorsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < sectorList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = sectorList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteSector(' + sectorList[i].id + ', \'' + sectorList[i].name + '\')" style="width: 100px">Delete</button>';
+              }
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+                alert("An error occurred while the query was running. Please, contact the developers.");
+              }
+          });
+    document.getElementById("newSector").value = "";
   }
 
   function checkList() {
@@ -104,8 +144,10 @@
     }
   }
 
-  function deleteSector(id) {
+  /*function deleteSector(id) {
     var sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    var used_sectors = JSON.parse('{{ usedSectorsJSON | safe }}');
+
     var sectorName = "";
     for (i = 0; i < sectors.length; i++) {
       if (sectors[i].id == id) {
@@ -113,7 +155,23 @@
         break;
       }
     }
+
+    var sector_customers = [];
+
+    for (var i = 0; i < used_sectors.length; i++) {
+      if (used_sectors[i].sector == sectorName && sectorName != "") {
+        sector_customers.push(used_sectors[i].name);
+      }
+    }
+
     var confirmMessage = "Do you really want to delete customer sector \"" + sectorName + "\"?"
+    if (sector_customers.length > 0) {
+      confirmMessage += "\n\nField \"Customer sector\" of the following customers will be cleared:";
+      for (var i = 0; i < sector_customers.length; i++) {
+        confirmMessage += "\n - " + sector_customers[i];
+      }
+    }
+
     if (confirm(confirmMessage)) {
       var obj = {};
       var body = JSON.stringify(obj);
@@ -127,6 +185,59 @@
           error: function(response, error) {
             console.log(response);
               alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }*/
+  function deleteSector(id, sectorName) {
+    var sectors = JSON.parse('{{ sectorsJSON | safe }}');
+    var used_sectors = JSON.parse('{{ usedSectorsJSON | safe }}');
+
+    var sector_customers = [];
+
+    for (var i = 0; i < used_sectors.length; i++) {
+      if (used_sectors[i].sector == sectorName && sectorName != "") {
+        sector_customers.push(used_sectors[i].name);
+      }
+    }
+
+    var confirmMessage = "Do you really want to delete customer sector \"" + sectorName + "\"?"
+    if (sector_customers.length > 0) {
+      confirmMessage += "\n\nField \"Customer sector\" of the following customers will be cleared:";
+      for (var i = 0; i < sector_customers.length; i++) {
+        confirmMessage += "\n - " + sector_customers[i];
+      }
+    }
+
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_sector/" + id,
+        data: body,
+        success: function(response) {
+          var sectorList = JSON.parse(response);
+
+              var table = document.getElementById("sectorsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < sectorList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = sectorList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteSector(' + sectorList[i].id + ', \'' + sectorList[i].name + '\')" style="width: 100px">Delete</button>';
+            }
+        },
+          error: function(response, error) {
+            console.log(response);
+            alert("An error occurred while the query was running. Please, contact the developers.");
           }
       });
       return false;
@@ -146,12 +257,12 @@
       {% for sector in sectors %}
       <tr>
         <td>{{ sector.name }}</td>
-        <td><button class="btn btn-danger" onclick="deleteSector({{ sector.id }})">Delete</button></td>
+        <td><button class="btn btn-danger" onclick="deleteCloud({{ sector.id }} ',{{ sector.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">
         <td><input class="form-control" id="newSector" type="text" style="width: 400px"></input></td>
-        <td><button class="btn btn-add" onclick="addSector()">Add</button></td>
+        <td><button class="btn btn-add" onclick="addSector()" style="width: 100px">Add</button></td>
         <td></td>
       </tr>
     </table>

@@ -46,8 +46,8 @@
         <td>{{ user.role }}</td>
         <td>{{ user.company }}</td>
         <td>{{ user.email }}</td>
-        <td><a class="btn btn-violet" href="/edit_user/{{user.id}}">Edit</a></td>
-        <td><a class="btn btn-danger" onclick="deleteUser({{user.id}}, '{{ user.username }}')">Delete</a></td>
+        <td><a class="btn btn-violet" href="/edit_user/{{user.id}}" style="width: 70px">Edit</a></td>
+        <td><a class="btn btn-danger" onclick="deleteUser({{user.id}}, '{{ user.username }}')" style="width: 70px">Delete</a></td>
       </tr>
       {% endfor %}
     </table>

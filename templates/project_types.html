@@ -9,7 +9,7 @@
     document.getElementById("saveButton").style.visibility = "hidden";
   }
 
-  function addType() {
+  /*function addType() {
     var table = document.getElementById("typesTable");
     var newType = document.getElementById("newType").value;
     if (newType.trim() != '') {
@@ -27,6 +27,46 @@
     } else {
       document.getElementById("saveButton").style.visibility = "hidden";
     }
+  }*/
+
+  function addType() {
+    var table = document.getElementById("typesTable");
+    var newType = document.getElementById("newType").value;
+
+    var submitObject = {"name": newType};
+    var body = JSON.stringify(submitObject);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/add_project_type",
+          data: body,
+          success: function(response) {
+              var typeList = JSON.parse(response);
+
+              var table = document.getElementById("typesTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < typeList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = typeList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteType(' + typeList[i].id + ', \'' + typeList[i].name + '\')" style="width: 100px">Delete</button>';
+              }
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+                alert("An error occurred while the query was running. Please, contact the developers.");
+              }
+          });
+    document.getElementById("newType").value = "";
   }
 
   function checkList() {
@@ -104,8 +144,10 @@
     }
   }
 
-  function deleteType(id) {
+  /*function deleteType(id) {
     var types = JSON.parse('{{ typesJSON | safe }}');
+    var used_types = JSON.parse('{{ usedTypesJSON | safe }}');
+
     var typeName = "";
     for (i = 0; i < types.length; i++) {
       if (types[i].id == id) {
@@ -113,7 +155,23 @@
         break;
       }
     }
+
+    var type_customers = [];
+
+    for (var i = 0; i < used_types.length; i++) {
+      if (used_types[i].project_type == typeName && typeName != "") {
+        type_customers.push(used_types[i].name);
+      }
+    }
+
     var confirmMessage = "Do you really want to delete project type \"" + typeName + "\"?"
+    if (type_customers.length > 0) {
+      confirmMessage += "\n\nField \"Project type\" of the following customers will be cleared:";
+      for (var i = 0; i < type_customers.length; i++) {
+        confirmMessage += "\n - " + type_customers[i];
+      }
+    }
+
     if (confirm(confirmMessage)) {
       var obj = {};
       var body = JSON.stringify(obj);
@@ -127,6 +185,60 @@
           error: function(response, error) {
             console.log(response);
               alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }*/
+
+   function deleteType(id, typeName) {
+    var types = JSON.parse('{{ typesJSON | safe }}');
+    var used_types = JSON.parse('{{ usedTypesJSON | safe }}');
+
+    var type_customers = [];
+
+    for (var i = 0; i < used_types.length; i++) {
+      if (used_types[i].project_type == typeName && typeName != "") {
+        type_customers.push(used_types[i].name);
+      }
+    }
+
+    var confirmMessage = "Do you really want to delete project type \"" + typeName + "\"?"
+    if (type_customers.length > 0) {
+      confirmMessage += "\n\nField \"Project type\" of the following customers will be cleared:";
+      for (var i = 0; i < type_customers.length; i++) {
+        confirmMessage += "\n - " + type_customers[i];
+      }
+    }
+
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_project_type/" + id,
+        data: body,
+        success: function(response) {
+          var typeList = JSON.parse(response);
+
+              var table = document.getElementById("typesTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < typeList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = typeList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteType(' + typeList[i].id + ', \'' + typeList[i].name + '\')" style="width: 100px">Delete</button>';
+            }
+        },
+          error: function(response, error) {
+            console.log(response);
+            alert("An error occurred while the query was running. Please, contact the developers.");
           }
       });
       return false;
@@ -146,12 +258,12 @@
       {% for type in types %}
       <tr>
         <td>{{ type.name }}</td>
-        <td><button class="btn btn-danger" onclick="deleteType({{ type.id }})">Delete</button></td>
+        <td><button class="btn btn-danger" onclick="deleteType({{ type.id }} ',{{ type.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">
         <td><input class="form-control" id="newType" type="text" style="width: 400px"></input></td>
-        <td><button class="btn btn-add" onclick="addType()">Add</button></td>
+        <td><button class="btn btn-add" onclick="addType()" style="width: 100px">Add</button></td>
         <td></td>
       </tr>
     </table>

@@ -56,8 +56,8 @@
       <tr>
         <td>{{ category.name }}</td>
         <td>{{ category.gname }}</td>
-        <td><a href="edit_category/{{ category.id }}" class="btn btn-violet ">Edit</a></td>
-        <td><button class="btn btn-danger " onclick="deleteCategory({{ category.id }})">Delete</button></td>
+        <td><a href="edit_category/{{ category.id }}" class="btn btn-violet " style="width: 100px">Edit</a></td>
+        <td><button class="btn btn-danger " onclick="deleteCategory({{ category.id }})" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
     </table>

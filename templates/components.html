@@ -36,7 +36,7 @@
     <h1>Products</h1>
     <a class="btn btn-violet btn-right" style="width: 200px" href="/settings">< Back</a>
     <hr>
-    <a class="btn btn-violet" href="/add_component">Add component</a>
+    <a class="btn btn-violet" href="/add_component">Add product</a>
     <hr>
     <table class="table table-striped" id="componentsTable">
       <tr>
@@ -51,8 +51,8 @@
         <td>{{ component.category }}</td>
         <td>{{ component.name }}</td>
         <td><a target="_blank" href="{{ component.link }}">{{ component.link }}</a></td>
-        <td><a href="edit_component/{{ component.id }}" class="btn btn-violet ">Edit</a></td>
-        <td><button class="btn btn-danger" onclick="deleteComponent({{ component.id }}, '{{ component.name }}')">Delete</button></td>
+        <td><a href="edit_component/{{ component.id }}" class="btn btn-violet " style="width: 100px">Edit</a></td>
+        <td><button class="btn btn-danger" onclick="deleteComponent({{ component.id }}, '{{ component.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
     </table>

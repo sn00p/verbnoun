@@ -101,22 +101,27 @@ def login():
                 session['username'] = username
                 flash('You are now logged in.', 'success')
                 return redirect(url_for('dashboard'))
-        elif result == 0 :
-            if (ldap3.Connection(app.config['LDAP_SERVER'], username + '@xentaurs.com', password_candidate)):
-                session['logged_in'] = True
-                session['username'] = username
-                session['role'] = 'employee'
-                flash('You are now logged in.', 'success')
-                return redirect(url_for('dashboard'))
             else:
-                error = 'Invalid login'
+                error = 'Invalid password'
                 return render_template('login.html', error = error)
+        elif result == 0 :
+            try:
+                if (ldap3.Connection(app.config['LDAP_SERVER'], username + '@xentaurs.com', password_candidate)):
+                    session['logged_in'] = True
+                    session['username'] = username
+                    session['role'] = 'employee'
+                    flash('You are now logged in.', 'success')
+                    return redirect(url_for('dashboard'))
+                else:
+                    error = 'Invalid login'
+                    return render_template('login.html', error = error)
+                except:
+                    error = 'Username not found'
+                    return render_template('login.html', error = error)
         else:
             error = 'Username not found'
             return render_template('login.html', error = error)
-
         cur.close()
-
     return render_template('login.html', form = form)
 
 def is_logged_in(f):
@@ -1331,6 +1336,18 @@ def close_my_projects():
     cursor.close()
     return json.dumps({}), 200, {'ContentType':'application/json'}
 
+@app.route('/add_group', methods=['POST'])
+@is_logged_in
+def add_group():
+    cursor = mysql.connection.cursor()
+    newgroup = json.JSONDecoder().decode(request.data.decode('utf-8'))
+    cursor.execute("INSERT INTO groups(name) VALUES ('" + newgroup['name'] + "')")
+    mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM groups")
+    groups = cursor.fetchall()
+    cursor.close()
+    return json.dumps(groups), 200, {'ContentType':'application/json'}
+
 @app.route('/delete_group/<int:id>', methods=['GET'])
 @is_logged_in
 def delete_group(id):
@@ -1341,8 +1358,10 @@ def delete_group(id):
     cursor.execute("DELETE FROM categories WHERE gname='" + group['name'] +"'")
     cursor.execute("DELETE FROM components WHERE gname='" + group['name'] +"'")
     mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM groups")
+    groups = cursor.fetchall()
     cursor.close()
-    return json.dumps({}), 200, {'ContentType':'application/json'}
+    return json.dumps(groups), 200, {'ContentType':'application/json'}
 
 @app.route('/delete_category/<int:id>', methods=['GET'])
 @is_logged_in
@@ -1653,8 +1672,11 @@ def customer_sector():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM customer_sector")
     sectors = cur.fetchall()
+    u_s = cur.execute("SELECT name, sector FROM customers")
+    used_sectors = cur.fetchall()
     cur.close()
     sectorsJSON = json.JSONEncoder().encode(sectors)
+    usedSectorsJSON = json.JSONEncoder().encode(used_sectors)
 
     if request.method == 'POST':
         cursor = mysql.connection.cursor()
@@ -1665,10 +1687,22 @@ def customer_sector():
         cursor.close()
 
     if result > 0:
-        return render_template('customer_sector.html', sectors = sectors, sectorsJSON = sectorsJSON)
+        return render_template('customer_sector.html', sectors = sectors, sectorsJSON = sectorsJSON, usedSectorsJSON = usedSectorsJSON)
     else:
         msg = 'No groups found.'
         return render_template('customer_sector.html', msg = msg)
+
+@app.route('/add_sector', methods=['POST'])
+@is_logged_in
+def add_sector():
+    cursor = mysql.connection.cursor()
+    newsector = json.JSONDecoder().decode(request.data.decode('utf-8'))
+    cursor.execute("INSERT INTO customer_sector(name) VALUES ('" + newsector['name'] + "')")
+    mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM customer_sector")
+    sectors = cursor.fetchall()
+    cursor.close()
+    return json.dumps(sectors), 200, {'ContentType':'application/json'}
 
 @app.route('/delete_sector/<int:id>', methods=['GET'])
 @is_logged_in
@@ -1676,8 +1710,10 @@ def delete_sector(id):
     cursor = mysql.connection.cursor()
     cursor.execute("DELETE FROM customer_sector WHERE id=" + str(id))
     mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM customer_sector")
+    sectors = cursor.fetchall()
     cursor.close()
-    return json.dumps({}), 200, {'ContentType':'application/json'}
+    return json.dumps(sectors), 200, {'ContentType':'application/json'}
 
 @app.route('/public_clouds', methods = ['GET', 'POST'])
 @is_logged_in
@@ -1685,8 +1721,18 @@ def public_clouds():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM public_clouds")
     clouds = cur.fetchall()
+    raw_data_result = cur.execute('SELECT name, public_clouds FROM customers WHERE public_clouds <> ""')
+    raw_data = cur.fetchall()
+    used_clouds = []
+    for c in raw_data:
+        obj = {}
+        obj['name'] = c['name']
+        obj['clouds'] = json.loads(c['public_clouds'])
+        used_clouds.append(obj)
     cur.close()
     cloudsJSON = json.JSONEncoder().encode(clouds)
+    usedCloudsJSON = json.dumps(used_clouds)
+
 
     if request.method == 'POST':
         cursor = mysql.connection.cursor()
@@ -1697,10 +1743,22 @@ def public_clouds():
         cursor.close()
 
     if result > 0:
-        return render_template('public_clouds.html', clouds = clouds, cloudsJSON = cloudsJSON)
+        return render_template('public_clouds.html', clouds = clouds, cloudsJSON = cloudsJSON, usedCloudsJSON = usedCloudsJSON)
     else:
         msg = 'No groups found.'
         return render_template('public_clouds.html', msg = msg)
+
+@app.route('/add_cloud', methods=['POST'])
+@is_logged_in
+def add_cloud():
+    cursor = mysql.connection.cursor()
+    newcloud = json.JSONDecoder().decode(request.data.decode('utf-8'))
+    cursor.execute("INSERT INTO public_clouds(name) VALUES ('" + newcloud['name'] + "')")
+    mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM public_clouds")
+    clouds = cursor.fetchall()
+    cursor.close()
+    return json.dumps(clouds), 200, {'ContentType':'application/json'}
 
 @app.route('/delete_cloud/<int:id>', methods=['GET'])
 @is_logged_in
@@ -1708,8 +1766,10 @@ def delete_cloud(id):
     cursor = mysql.connection.cursor()
     cursor.execute("DELETE FROM public_clouds WHERE id=" + str(id))
     mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM public_clouds")
+    clouds = cursor.fetchall()
     cursor.close()
-    return json.dumps({}), 200, {'ContentType':'application/json'}
+    return json.dumps(clouds), 200, {'ContentType':'application/json'}
 
 @app.route('/project_types', methods = ['GET', 'POST'])
 @is_logged_in
@@ -1717,8 +1777,11 @@ def project_types():
     cur = mysql.connection.cursor()
     result = cur.execute("SELECT * FROM project_types")
     types = cur.fetchall()
+    u_t = cur.execute("SELECT name, project_type FROM customers")
+    used_types = cur.fetchall()
     cur.close()
     typesJSON = json.JSONEncoder().encode(types)
+    usedTypesJSON = json.JSONEncoder().encode(used_types)
 
     if request.method == 'POST':
         cursor = mysql.connection.cursor()
@@ -1729,10 +1792,22 @@ def project_types():
         cursor.close()
 
     if result > 0:
-        return render_template('project_types.html', types = types, typesJSON = typesJSON)
+        return render_template('project_types.html', types = types, typesJSON = typesJSON, usedTypesJSON = usedTypesJSON)
     else:
         msg = 'No groups found.'
         return render_template('project_types.html', msg = msg)
+
+@app.route('/add_project_type', methods=['POST'])
+@is_logged_in
+def add_project_type():
+    cursor = mysql.connection.cursor()
+    newtype = json.JSONDecoder().decode(request.data.decode('utf-8'))
+    cursor.execute("INSERT INTO project_types(name) VALUES ('" + newtype['name'] + "')")
+    mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM project_types")
+    types = cursor.fetchall()
+    cursor.close()
+    return json.dumps(types), 200, {'ContentType':'application/json'}
 
 @app.route('/delete_project_type/<int:id>', methods=['GET'])
 @is_logged_in
@@ -1740,8 +1815,10 @@ def delete_project_type(id):
     cursor = mysql.connection.cursor()
     cursor.execute("DELETE FROM project_types WHERE id=" + str(id))
     mysql.connection.commit()
+    result = cursor.execute("SELECT * FROM project_types")
+    types = cursor.fetchall()
     cursor.close()
-    return json.dumps({}), 200, {'ContentType':'application/json'}
+    return json.dumps(types), 200, {'ContentType':'application/json'}
 
 @app.route('/edit_customer/<string:id>', methods=['GET', 'POST'])
 @is_logged_in
@@ -1761,15 +1838,16 @@ def edit_customer(id):
     typesJSON = json.JSONEncoder().encode(types)
     cloudsJSON = json.JSONEncoder().encode(clouds)
 
-    customer_clouds = json.JSONEncoder().encode(json.loads(customer['public_clouds']))
+    try:
+        customer_clouds = json.JSONEncoder().encode(json.loads(customer['public_clouds']))
+    except:
+        customer_clouds = json.JSONEncoder().encode('[]')
     customer_sector = customer['sector']
     customer_type = customer['project_type']
-    print(customer_clouds)
 
     if request.method == 'POST':
         cursor = mysql.connection.cursor()
         customer = json.JSONDecoder().decode(request.data.decode('utf-8'))
-        print(json.dumps(customer['clouds']));
         cursor.execute('UPDATE customers SET name="' + customer['name'] + '", comments="' + customer['comment'] + '", sector="' + customer['sector'] + '", project_type ="' + customer['type'] + '", emp_number=' + customer['empNumber'] + ', valuation='+ customer['valuation'] +', spend_it=' + customer['spend'] + ', deploy_speed=' + customer['speed'] + ', public_clouds=\'' + str(customer['clouds']) + '\' WHERE id=' + str(id))
         mysql.connection.commit()
         cursor.close()

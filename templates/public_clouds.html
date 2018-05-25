@@ -9,7 +9,8 @@
     document.getElementById("saveButton").style.visibility = "hidden";
   }
 
-  function addCloud() {
+
+  /*function addCloud() {
     var table = document.getElementById("cloudsTable");
     var newCloud = document.getElementById("newCloud").value;
     if (newCloud.trim() != '') {
@@ -27,6 +28,46 @@
     } else {
       document.getElementById("saveButton").style.visibility = "hidden";
     }
+  }*/
+
+  function addCloud() {
+    var table = document.getElementById("cloudsTable");
+    var newCloud = document.getElementById("newCloud").value;
+
+    var submitObject = {"name": newCloud};
+    var body = JSON.stringify(submitObject);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/add_cloud",
+          data: body,
+          success: function(response) {
+              var cloudList = JSON.parse(response);
+
+              var table = document.getElementById("cloudsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < cloudList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = cloudList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteCloud(' + cloudList[i].id + ', \'' + cloudList[i].name + '\')" style="width: 100px">Delete</button>'; 
+              }
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+                alert("An error occurred while the query was running. Please, contact the developers.");
+              }
+          });
+    document.getElementById("newCloud").value = "";
   }
 
   function checkList() {
@@ -104,8 +145,11 @@
     }
   }
 
-  function deleteCloud(id) {
+  /*function deleteCloud(id) {
     var clouds = JSON.parse('{{ cloudsJSON | safe }}');
+    var usedCloudsJSON = {{ usedCloudsJSON | tojson | safe }};
+    var usedClouds = JSON.parse(usedCloudsJSON);
+
     var cloudName = "";
     for (i = 0; i < clouds.length; i++) {
       if (clouds[i].id == id) {
@@ -113,7 +157,25 @@
         break;
       }
     }
+
+    cloud_customers = []; 
+
+    for (var i = 0; i < usedClouds.length; i++) {
+      for (var j = 0; j < usedClouds[i].clouds.length; j++) {
+        if (usedClouds[i].clouds[j] == cloudName) {
+          cloud_customers.push(usedClouds[i].name);
+        }
+      }
+    }
+
     var confirmMessage = "Do you really want to delete public cloud \"" + cloudName + "\"?"
+    if (cloud_customers.length > 0) {
+      confirmMessage += "\n\nField \"" + cloudName + "\" will be removed from the list of used public clouds of the following customers:";
+      for (var i = 0; i < cloud_customers.length; i++) {
+        confirmMessage += "\n - " + cloud_customers[i];
+      }
+    }
+
     if (confirm(confirmMessage)) {
       var obj = {};
       var body = JSON.stringify(obj);
@@ -127,6 +189,71 @@
           error: function(response, error) {
             console.log(response);
               alert(JSON.parse(response.responseText).message);
+          }
+      });
+      return false;
+    }
+  }*/
+
+  function deleteCloud(id, cloudName) {
+    var clouds = JSON.parse('{{ cloudsJSON | safe }}');
+    var usedCloudsJSON = {{ usedCloudsJSON | tojson | safe }};
+    var usedClouds = JSON.parse(usedCloudsJSON);
+
+    /*var cloudName = "";
+    for (i = 0; i < clouds.length; i++) {
+      if (clouds[i].id == id) {
+        cloudName = clouds[i].name;
+        break;
+      }
+    }*/
+
+    var cloud_customers = []; 
+
+    for (var i = 0; i < usedClouds.length; i++) {
+      for (var j = 0; j < usedClouds[i].clouds.length; j++) {
+        if (usedClouds[i].clouds[j] == cloudName) {
+          cloud_customers.push(usedClouds[i].name);
+        }
+      }
+    }
+
+    var confirmMessage = "Do you really want to delete public cloud \"" + cloudName + "\"?"
+    if (cloud_customers.length > 0) {
+      confirmMessage += "\n\nField \"" + cloudName + "\" will be removed from the list of used public clouds of the following customers:";
+      for (var i = 0; i < cloud_customers.length; i++) {
+        confirmMessage += "\n - " + cloud_customers[i];
+      }
+    }
+
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_cloud/" + id,
+        data: body,
+        success: function(response) {
+          var cloudList = JSON.parse(response);
+
+              var table = document.getElementById("cloudsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < cloudList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+
+                cell1.innerHTML = cloudList[i].name;
+                cell2.innerHTML = '<button class="btn btn-danger" onclick="deleteCloud(' + cloudList[i].id + ', \'' + cloudList[i].name + '\')" style="width: 100px">Delete</button>'; 
+            }
+        },
+          error: function(response, error) {
+            console.log(response);
+            alert("An error occurred while the query was running. Please, contact the developers.");
           }
       });
       return false;
@@ -146,12 +273,12 @@
       {% for cloud in clouds %}
       <tr>
         <td>{{ cloud.name }}</td>
-        <td><button class="btn btn-danger" onclick="deleteCloud({{ cloud.id }})">Delete</button></td>
+        <td><button class="btn btn-danger" onclick="deleteCloud({{ cloud.id }} ',{{ cloud.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">
         <td><input class="form-control" id="newCloud" type="text" style="width: 400px"></input></td>
-        <td><button class="btn btn-add" onclick="addCloud()">Add</button></td>
+        <td><button class="btn btn-add" onclick="addCloud()" style="width: 100px">Add</button></td>
         <td></td>
       </tr>
     </table>

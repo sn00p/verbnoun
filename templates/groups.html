@@ -9,7 +9,7 @@
     document.getElementById("saveButton").style.visibility = "hidden";
   }
 
-  function addGroup() {
+  /*function addGroup() {
     var table = document.getElementById("groupsTable");
     var newGroup = document.getElementById("newGroup").value;
     if (newGroup.trim() != '') {
@@ -27,6 +27,48 @@
     } else {
       document.getElementById("saveButton").style.visibility = "hidden";
     }
+  }*/
+
+  function addGroup() {
+    var table = document.getElementById("groupsTable");
+    var newGroup = document.getElementById("newGroup").value;
+
+    var submitObject = {"name": newGroup};
+    var body = JSON.stringify(submitObject);
+
+    $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    $.ajax({
+      type: "POST",
+        headers: {"Content-Type": "application/json"},
+          url: $SCRIPT_ROOT + "/add_group",
+          data: body,
+          success: function(response) {
+              var groupList = JSON.parse(response);
+
+              var table = document.getElementById("groupsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < groupList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+
+                cell1.innerHTML = groupList[i].name;
+                cell2.innerHTML = '<a href="edit_group/' + groupList[i].id +'" class="btn btn-violet" style="width: 100px">Edit</a>'
+                cell3.innerHTML = '<button class="btn btn-danger" onclick="deleteGroup(' + groupList[i].id + ', \'' + groupList[i].name + '\')" style="width: 100px">Delete</button>';
+              }
+            },
+            error: function(response, error) {
+                console.log(response);
+                console.log(error);
+                alert("An error occurred while the query was running. Please, contact the developers.");
+              }
+          });
+    document.getElementById("newGroup").value = "";
   }
 
   function checkList() {
@@ -104,7 +146,7 @@
     }
   }
 
-  function deleteGroup(id) {
+  /*function deleteGroup(id) {
     var groups = JSON.parse('{{ groupsJSON | safe }}');
     var categories = JSON.parse('{{ categoriesJSON | safe }}');
     var groupName = "";
@@ -141,6 +183,62 @@
       });
       return false;
     }
+  }*/
+
+  function deleteGroup(id, groupName) {
+
+    var groups = JSON.parse('{{ groupsJSON | safe }}');
+    var categories = JSON.parse('{{ categoriesJSON | safe }}');
+
+    var groupCategories = [];
+    for (i = 0; i < categories.length; i++) {
+      if (categories[i].gname == groupName) {
+        groupCategories.push(categories[i].name)
+      }
+    }
+
+    var confirmMessage = "Do you really want to delete group \"" + groupName + "\" and all its components?"
+    for (i = 0; i < groupCategories.length; i++) {
+      confirmMessage = confirmMessage + "\n-" + groupCategories[i];
+    }
+    if (groupCategories.length == 0) {
+      confirmMessage = confirmMessage + "\n This group doesn't contain any components."
+    }
+
+    if (confirm(confirmMessage)) {
+      var obj = {};
+      var body = JSON.stringify(obj);
+      $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+      $.ajax({
+        url: $SCRIPT_ROOT + "/delete_group/" + id,
+        data: body,
+        success: function(response) {
+          var groupList = JSON.parse(response);
+
+              var table = document.getElementById("groupsTable");
+              while (table.rows.length > 2) {
+                table.deleteRow(1);
+              }
+
+              for (var i = 0; i < groupList.length; i++) {
+                var row = table.insertRow(table.rows.length-1);
+
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                var cell3 = row.insertCell(2);
+
+                cell1.innerHTML = groupList[i].name;
+                cell2.innerHTML = '<a href="edit_group/' + groupList[i].id +'" class="btn btn-violet" style="width: 100px">Edit</a>'
+                cell3.innerHTML = '<button class="btn btn-danger" onclick="deleteGroup(' + groupList[i].id + ', \'' + groupList[i].name + '\')" style="width: 100px">Delete</button>';
+            }
+        },
+          error: function(response, error) {
+            console.log(response);
+            alert("An error occurred while the query was running. Please, contact the developers.");
+          }
+      });
+      return false;
+    }
   }
 </script>
     <h1>Groups of components</h1>
@@ -156,13 +254,13 @@
       {% for group in groups %}
       <tr>
         <td>{{ group.name }}</td>
-        <td><a href="edit_group/{{ group.id }}" class="btn btn-violet">Edit</a></td>
-        <td><button class="btn btn-danger" onclick="deleteGroup({{ group.id }})">Delete</button></td>
+        <td><a href="edit_group/{{ group.id }}" class="btn btn-violet" style="width: 100px">Edit</a></td>
+        <td><button class="btn btn-danger" onclick="deleteGroup({{ group.id }} ',{{ group.name }}')" style="width: 100px">Delete</button></td>
       </tr>
       {% endfor %}
       <tr id="addRow">
-        <td><input id="newGroup" type="text" style="width: 400px"></input></td>
-        <td><button class="btn btn-add" onclick="addGroup()">Add</button></td>
+        <td><input id="newGroup" type="text" style="width: 400px" class="form-control"></input></td>
+        <td><button class="btn btn-add" onclick="addGroup()" style="width: 100px">Add</button></td>
         <td></td>
       </tr>
     </table>

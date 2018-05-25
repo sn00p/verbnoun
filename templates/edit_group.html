@@ -8,7 +8,7 @@
 		var table = document.getElementById("categoriesTable");
 		var catList = JSON.parse('{{ categoriesJSON | safe }}');
 		if (catList.length == 0) {
-			document.getElementById("message").innerHTML = "Group doesn't contain any categories";
+			document.getElementById("message").innerHTML = "Group doesn't contain any components";
 		}
 
 	for (i = 0; i < catList.length; i++) {

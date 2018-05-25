@@ -36,13 +36,13 @@
       <tr>
         <td>{{ customer.name }}</td>
         <td>{{ customer.comments }}</td>
-        <td><a href="edit_customer/{{ customer.id }}" class="btn btn-violet">Edit</a></td>
+        <td><a href="edit_customer/{{ customer.id }}" class="btn btn-violet" style="width: 100px">Edit</a></td>
         <td>
           <!--<form action="{{url_for('delete_customer', id=customer.id)}}" method="post" >
             <input type="hidden" name="_method" value="DELETE">
             <input type="submit" value="Delete" class="btn btn-danger">
           </form>-->
-          <button class="btn btn-danger" onclick="deleteCustomer({{ customer.id }}, '{{customer.name}}')">Delete</button>
+          <button class="btn btn-danger" onclick="deleteCustomer({{ customer.id }}, '{{customer.name}}')" style="width: 100px">Delete</button>
         </td>
       </tr>
       {% endfor %}
