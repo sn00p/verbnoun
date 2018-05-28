@@ -841,6 +841,68 @@ def article_add_wizard_6():
 
     return render_template('article_add_wizard_6.html', customer = customer, componentsJSON = componentsJSON, requirementsJSON = requirementsJSON, article_id = article_id, project_vn = project_vn)
 
+@app.route('/edit_weights', methods = ['GET', 'POST'])
+@is_logged_in
+def edit_weights():
+    username = session['username']
+    customer = session['customer']
+    project_id = 0
+    project_vn = ""
+    componentsJSON = "[]"
+    requirementsJSON = "[]"
+    br = """["Business requirements"]"""
+    tr = """["Technical requirements"]"""
+    gr = """["Governance requirements"]"""
+    cursor = mysql.connection.cursor()
+    result = cursor.execute("SELECT * FROM projects WHERE editor='" + session['username'] + "'  AND is_active IS TRUE")
+    if result > 0:
+        vndata = cursor.fetchall()
+        if (vndata[result-1]['components'] != None):
+            componentsJSON = vndata[result-1]['components']
+        if (vndata[result-1]['business_requirements'] != None):
+            br = vndata[result-1]['business_requirements']
+        if (vndata[result-1]['technical_requirements'] != None):
+            tr = vndata[result-1]['technical_requirements']
+        if (vndata[result-1]['governance_requirements'] != None):
+            gr = vndata[result-1]['governance_requirements']
+        project_id = vndata[result-1]['id']
+        customer = vndata[result-1]['customer_name']
+        project_vn = vndata[result-1]['vn']
+    else:
+        sql = "INSERT INTO projects(editor, governance_requirements, is_active) VALUES (%s, %s, TRUE)"
+        cursor.execute(sql, (session['username'], request.data.decode('utf-8')))
+        result = cursor.execute("SELECT id FROM projects WHERE editor='" + session['username'] + "'  AND is_active IS TRUE")
+        p_id = cursor.fetchone()
+        project_id = p_id['id']
+    article_id = "0"
+    res = cursor.execute("SELECT * FROM articles WHERE project_id="+ str(project_id))
+    if res > 0:
+        a_id = cursor.fetchone()
+        article_id = a_id['id']
+    cursor.close()
+    requirementsJSON = "[" + br + ", " + tr + ", " + gr + "]"
+
+
+    if request.method == 'POST':
+        body = request.data.decode('utf-8')
+        cells = json.JSONEncoder().encode(json.JSONDecoder().decode(body)['cells'])
+        project = json.JSONEncoder().encode(json.JSONDecoder().decode(body)['project'])
+        chosenSolutions = json.JSONEncoder().encode(json.JSONDecoder().decode(body)['chosenSolutions'])
+        productComp = json.JSONEncoder().encode(json.JSONDecoder().decode(body)['productComp'])
+        print(productComp)
+        cur = mysql.connection.cursor()
+        res = cur.execute("SELECT * FROM articles WHERE project_id =" + str(project_id))
+        a = cur.fetchone()
+        if res > 0:
+            cur.execute("UPDATE articles SET body=%s, customer=%s, chosen_solutions=%s, product_comp=%s, create_date=SYSDATE() WHERE project_id=%s", (cells, customer, chosenSolutions, productComp, str(project_id)))
+        else:
+            cur.execute("INSERT INTO articles (customer, username, body, chosen_solutions, product_comp, project_id) VALUES (%s, %s, %s, %s, %s, "+str(project_id)+")", (customer, username, cells, chosenSolutions, productComp))
+        cur.execute("UPDATE projects SET is_active=FALSE, vn = '" + project + "', editor='' WHERE id=" + str(project_id))
+        mysql.connection.commit()
+        cur.close()
+
+    return render_template('edit_weights.html', customer = customer, componentsJSON = componentsJSON, requirementsJSON = requirementsJSON, article_id = article_id, project_vn = project_vn)
+
 @app.route('/delete_requirement_w3/<string:requirement_to_delete>')
 @is_logged_in
 def delete_requirement_w3(requirement_to_delete):

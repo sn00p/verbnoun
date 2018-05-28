@@ -133,7 +133,8 @@ th {
           url: $SCRIPT_ROOT + "/check_project/" + id,
           data: body,
           success: function(response) {
-              window.location.href = "/article_add_wizard_6";
+              //window.location.href = "/article_add_wizard_6";
+              window.location.href = "/edit_weights";
             },
             error: function(response, error) {
                 alert(JSON.parse(response.responseText).message);
