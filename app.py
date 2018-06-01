@@ -106,7 +106,10 @@ def login():
                 return render_template('login.html', error = error)
         elif result == 0 :
             try:
-                if (ldap3.Connection(app.config['LDAP_SERVER'], username + '@xentaurs.com', password_candidate)):
+                #if (ldap3.Connection(app.config['LDAP_SERVER'], username + '@xentaurs.com', password_candidate)):
+                s = ldap3.Server(app.config['LDAP_SERVER'], get_info=ALL)
+                c = ldap3.Connection(s, user=username + '@xentaurs.com', password=password_candidate)
+                if c.bind():
                     session['logged_in'] = True
                     session['username'] = username
                     session['role'] = 'employee'
